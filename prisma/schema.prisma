@@ -1,0 +1,176 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// admin user
+model Admin {
+  id        String   @id @unique @default(cuid())
+  email     String   @unique
+  userName  String
+  firstName String
+  lastName  String
+  otherName String?
+  phone     String
+  password  String
+  isActive  Boolean  @default(true)
+  role      Role     @default(ADMIN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// vendor user
+model Vendor {
+  id        String   @id @unique @default(cuid())
+  email     String   @unique
+  userName  String
+  firstName String
+  lastName  String
+  otherName String?
+  phone     String
+  password  String
+  stores    Store[]
+  isActive  Boolean  @default(true)
+  role      Role     @default(VENDOR)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// user or customer
+model User {
+  id              String   @id @unique @default(cuid())
+  email           String   @unique
+  userName        String
+  firstName       String?
+  lastName        String?
+  otherName       String?
+  salt            String?
+  phone           String
+  password        String
+  cart            Cart[]
+  Order           Order[]
+  isActive        Boolean  @default(true)
+  isEmailVerified Boolean  @default(false)
+  role            Role     @default(USER)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// a store that can sell products
+model Store {
+  id            String          @id @unique @default(cuid())
+  name          String
+  about         String
+  phone         String
+  address       String
+  location      String
+  storeCategory StoreCategory[]
+  product       Product[]
+  vendor        Vendor?         @relation(fields: [vendorId], references: [id])
+  vendorId      String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+// store categories
+model StoreCategory {
+  id          String   @id @unique @default(cuid())
+  name        String
+  description String
+  storeId     String
+  store       Store    @relation(fields: [storeId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// products that can be sold
+model Product {
+  id              String            @id @unique @default(cuid())
+  name            String
+  slug            String
+  description     String
+  price           Float
+  quantity        Int
+  rating          Float
+  images          String[]
+  status          ProductStatus     @default(ACTIVE)
+  storeId         String
+  store           Store             @relation(fields: [storeId], references: [id])
+  productCategory ProductCategory[]
+  OrderItem       OrderItem[]
+  Cart            Cart[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+}
+
+// product category
+model ProductCategory {
+  id        String   @id @unique @default(cuid())
+  name      String
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// cart of products for a user
+model Cart {
+  id        String   @id @unique @default(cuid())
+  quantity  Int
+  price     Float
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// order of products
+model Order {
+  id            String      @id @unique @default(cuid())
+  user          User        @relation(fields: [userId], references: [id])
+  userId        String
+  address       String
+  paymentMethod String
+  paidAmount    Float       @default(0.0)
+  deliveryFee   Float       @default(0.0)
+  totalPrice    Float
+  orderItem     OrderItem[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+// order items
+model OrderItem {
+  id        String   @id @unique @default(cuid())
+  quantity  Int
+  price     Float
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id])
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// enum of product status
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  DELETED
+}
+
+// role enum
+enum Role {
+  ADMIN
+  VENDOR
+  USER
+}
