@@ -24,6 +24,9 @@
       "@app/*": ["src/app/*"],
       "@app": ["src/app"],
 
+      // admin
+      "@admin/*": ["src/admin/*"],
+      "@admin": ["src/admin"],
       // user
       "@user/*": ["src/user/*"],
       "@user": ["src/user"],
@@ -33,6 +36,9 @@
       // store
       "@store/*": ["src/store/*"],
       "@store": ["src/store"],
+      // vendor
+      "@vendor/*": ["src/vendor/*"],
+      "@vendor": ["src/vendor"],
 
       // shared
       "@shared/*": ["src/shared/*"],

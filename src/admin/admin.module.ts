@@ -1,26 +1,20 @@
 import { Module } from '@nestjs/common';
-import { VendorService } from './vendor.service';
-import { VendorController } from './vendor.controller';
-import { StoreModule } from '@store/store.module';
+import { AdminService } from './admin.service';
+import { AdminController } from './admin.controller';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from '@shared';
-import { VendorJwtStrategy } from './strategy';
 
 @Module({
   imports: [
-    StoreModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: jwtConstants.secret,
       signOptions: { expiresIn: jwtConstants.expiresIn },
     }),
   ],
-  controllers: [VendorController],
-  exports: [VendorService],
-  providers: [
-    VendorService,
-    VendorJwtStrategy,
-  ],
+  providers: [AdminService],
+  controllers: [AdminController],
+  exports: [AdminService],
 })
-export class VendorModule { }
+export class AdminModule { }

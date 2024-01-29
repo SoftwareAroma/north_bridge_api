@@ -53,7 +53,7 @@ export class UserController {
     }
 
     @Get('users')
-    async getAllUsers(): Promise<ApiResponse<{ users: any[] }>> {
+    async getAllUsers(): Promise<ApiResponse<{ users: UserModel[] }>> {
         const _users = await this.userService.getUsers();
         return new ApiResponse<{ users: UserModel[] }>({
             data: { users: _users },
@@ -66,10 +66,10 @@ export class UserController {
     @Get('profile')
     async getUserProfile(
         @Req() request
-    ): Promise<ApiResponse<{ user: any }>> {
+    ): Promise<ApiResponse<{ user: UserModel }>> {
         const { userId } = request.user;
         const _user = await this.userService.profile(userId);
-        return new ApiResponse<{ user: any }>({
+        return new ApiResponse<{ user: UserModel }>({
             data: { user: _user },
             message: 'User profile fetched successfully',
             success: true,

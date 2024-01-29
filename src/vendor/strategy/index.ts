@@ -3,12 +3,12 @@ import { Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
 import { jwtConstants } from '@shared';
-import { UserService } from '@user/user.service';
+import { VendorService } from '../vendor.service';
 
 @Injectable()
-export class UserJwtStrategy extends PassportStrategy(Strategy) {
+export class VendorJwtStrategy extends PassportStrategy(Strategy) {
     constructor(
-        private userService: UserService,
+        private vendorService: VendorService,
     ) {
         super({
             // get access token form request object
@@ -32,12 +32,12 @@ export class UserJwtStrategy extends PassportStrategy(Strategy) {
     }
     async validate(payload: any) {
         // console.log(payload)
-        const _user = await this.userService.validateUser(payload.sub);
+        const _vendor = await this.vendorService.validateVendor(payload.sub);
         return {
-            _id: _user?.id,
-            role: _user?.role,
-            userId: _user?.id,
-            username: _user?.email,
+            _id: _vendor?.id,
+            role: _vendor?.role,
+            userId: _vendor?.id,
+            username: _vendor?.email,
         };
     }
 }

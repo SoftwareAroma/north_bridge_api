@@ -8,12 +8,16 @@ import { PrismaModule } from '@shared/prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
 import { configuration } from '@shared/index';
 import * as Joi from 'joi';
+import { VendorModule } from '@vendor/vendor.module';
+import { AdminModule } from '@admin/admin.module';
 
 @Module({
   imports: [
+    AdminModule,
     UserModule,
     ProductModule,
     StoreModule,
+    VendorModule,
 
     // prisma for database query and connection
     PrismaModule,

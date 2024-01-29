@@ -14,12 +14,13 @@ datasource db {
 model Admin {
   id        String   @id @unique @default(cuid())
   email     String   @unique
+  password  String
   userName  String
   firstName String
   lastName  String
   otherName String?
   phone     String
-  password  String
+  salt      String?
   isActive  Boolean  @default(true)
   role      Role     @default(ADMIN)
   createdAt DateTime @default(now())
@@ -28,19 +29,21 @@ model Admin {
 
 // vendor user
 model Vendor {
-  id        String   @id @unique @default(cuid())
-  email     String   @unique
-  userName  String
-  firstName String
-  lastName  String
-  otherName String?
-  phone     String
-  password  String
-  stores    Store[]
-  isActive  Boolean  @default(true)
-  role      Role     @default(VENDOR)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String   @id @unique @default(cuid())
+  email           String   @unique
+  password        String
+  userName        String
+  firstName       String
+  lastName        String
+  otherName       String?
+  phone           String
+  salt            String?
+  stores          Store[]
+  isActive        Boolean  @default(true)
+  isEmailVerified Boolean  @default(false)
+  role            Role     @default(VENDOR)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 // user or customer
@@ -55,7 +58,7 @@ model User {
   phone           String
   password        String
   cart            Cart[]
-  Order           Order[]
+  Orders          Order[]
   isActive        Boolean  @default(true)
   isEmailVerified Boolean  @default(false)
   role            Role     @default(USER)
@@ -65,18 +68,18 @@ model User {
 
 // a store that can sell products
 model Store {
-  id            String          @id @unique @default(cuid())
-  name          String
-  about         String
-  phone         String
-  address       String
-  location      String
-  storeCategory StoreCategory[]
-  product       Product[]
-  vendor        Vendor?         @relation(fields: [vendorId], references: [id])
-  vendorId      String?
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  id         String          @id @unique @default(cuid())
+  name       String
+  about      String
+  phone      String
+  address    String
+  location   String
+  categories StoreCategory[]
+  products   Product[]
+  vendor     Vendor?         @relation(fields: [vendorId], references: [id])
+  vendorId   String?
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
 }
 
 // store categories
@@ -92,22 +95,21 @@ model StoreCategory {
 
 // products that can be sold
 model Product {
-  id              String            @id @unique @default(cuid())
-  name            String
-  slug            String
-  description     String
-  price           Float
-  quantity        Int
-  rating          Float
-  images          String[]
-  status          ProductStatus     @default(ACTIVE)
-  storeId         String
-  store           Store             @relation(fields: [storeId], references: [id])
-  productCategory ProductCategory[]
-  OrderItem       OrderItem[]
-  Cart            Cart[]
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
+  id          String            @id @unique @default(cuid())
+  name        String
+  description String
+  price       Float
+  quantity    Int
+  rating      Float
+  images      String[]
+  status      ProductStatus     @default(ACTIVE)
+  storeId     String
+  store       Store             @relation(fields: [storeId], references: [id])
+  categories  ProductCategory[]
+  orderItems  OrderItem[]
+  cart        Cart[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
 }
 
 // product category
@@ -127,8 +129,8 @@ model Cart {
   price     Float
   userId    String
   user      User     @relation(fields: [userId], references: [id])
-  productId String
   product   Product  @relation(fields: [productId], references: [id])
+  productId String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -143,7 +145,7 @@ model Order {
   paidAmount    Float       @default(0.0)
   deliveryFee   Float       @default(0.0)
   totalPrice    Float
-  orderItem     OrderItem[]
+  orderItems    OrderItem[]
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 }

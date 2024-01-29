@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString } from "class-validator";
+import { IsArray, IsNotEmpty, IsOptional, IsPhoneNumber, IsString } from "class-validator";
 
 export class CreateStoreDto {
     @IsString()
@@ -10,7 +10,7 @@ export class CreateStoreDto {
     @ApiProperty()
     about: string;
 
-    @IsString()
+    @IsPhoneNumber()
     @ApiProperty()
     phone: string;
 
@@ -22,15 +22,13 @@ export class CreateStoreDto {
     @ApiProperty()
     location: string;
 
-    @IsString()
+    @IsArray()
+    @IsOptional()
     @ApiProperty()
-    storeCategory: [string];
+    storeCategories: string[];
 
     @IsString()
-    @ApiProperty()
-    product: string;
-
-    @IsString()
+    @IsNotEmpty()
     @ApiProperty()
     vendorId: string;
 
