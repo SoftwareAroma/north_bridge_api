@@ -17,6 +17,12 @@ export class VendorController {
         private vendorService: VendorService,
     ) { }
 
+    /**
+     * Register a new vendor
+     * @param data [CreateVendorDto]
+     * @param response Response
+     * @returns access_token
+     */
     @Post('register')
     @ApiResponse({
         status: HttpStatus.CREATED,
