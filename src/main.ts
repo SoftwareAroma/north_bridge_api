@@ -32,7 +32,7 @@ async function bootstrap() {
 
 
   // global prefix
-  // app.setGlobalPrefix('api');
+  app.setGlobalPrefix('api');
   // enable CORS
   app.enableCors({
     origin: origin,
