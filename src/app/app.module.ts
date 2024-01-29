@@ -6,10 +6,12 @@ import { StoreModule } from '@store/store.module';
 import { UserModule } from '@user/user.module';
 import { PrismaModule } from '@shared/prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
-import { configuration } from '@shared/index';
+import { JwtStrategy, configuration, jwtConstants } from '@shared';
 import * as Joi from 'joi';
 import { VendorModule } from '@vendor/vendor.module';
 import { AdminModule } from '@admin/admin.module';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -21,6 +23,12 @@ import { AdminModule } from '@admin/admin.module';
 
     // prisma for database query and connection
     PrismaModule,
+
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    JwtModule.register({
+      secret: jwtConstants.secret,
+      signOptions: { expiresIn: jwtConstants.expiresIn },
+    }),
 
     /// prevent brute force attack
     // ThrottlerModule.forRoot({
@@ -47,6 +55,9 @@ import { AdminModule } from '@admin/admin.module';
     }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    JwtStrategy,
+  ],
 })
 export class AppModule { }

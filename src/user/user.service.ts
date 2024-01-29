@@ -49,7 +49,7 @@ export class UserService {
         const _user = await this.prismaService.user.create({
             data: userDto
         });
-        const payload = { sub: _user.id, username: _user.email };
+        const payload = { sub: _user.id, username: _user.email, role: _user.role };
         const token = this.jwtService.sign(payload);
         response.cookie('access_token', token, {
             httpOnly: true,
@@ -79,7 +79,7 @@ export class UserService {
         if (!isPasswordValid) {
             throw new HttpException('Invalid email or passowrd', HttpStatus.BAD_REQUEST);
         }
-        const payload = { sub: _user.id, username: _user.email };
+        const payload = { sub: _user.id, username: _user.email, role: _user.role };
         const token = this.jwtService.sign(payload);
         response.cookie('access_token', token, {
             httpOnly: true,

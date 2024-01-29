@@ -3,11 +3,16 @@ import { Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
 import { jwtConstants } from '@shared';
-import { VendorService } from '../vendor.service';
+import { AdminService } from '@admin/admin.service';
+import { UserService } from '@user/user.service';
+import { VendorService } from '@vendor/vendor.service';
+import { Role } from '@prisma/client';
 
 @Injectable()
-export class VendorJwtStrategy extends PassportStrategy(Strategy) {
+export class JwtStrategy extends PassportStrategy(Strategy) {
     constructor(
+        private adminService: AdminService,
+        private userService: UserService,
         private vendorService: VendorService,
     ) {
         super({
@@ -32,12 +37,31 @@ export class VendorJwtStrategy extends PassportStrategy(Strategy) {
     }
     async validate(payload: any) {
         // console.log(payload)
-        const _vendor = await this.vendorService.validateVendor(payload.sub);
-        return {
-            _id: _vendor?.id,
-            role: _vendor?.role,
-            userId: _vendor?.id,
-            username: _vendor?.email,
-        };
+        if (payload.role == Role.USER) {
+            const _user = await this.userService.validateUser(payload.sub);
+            return {
+                _id: _user?.id,
+                role: _user?.role,
+                userId: _user?.id,
+                username: _user?.email,
+            };
+        } else if (payload.role == Role.VENDOR) {
+            const _user = await this.vendorService.validateVendor(payload.sub);
+            return {
+                _id: _user?.id,
+                role: _user?.role,
+                userId: _user?.id,
+                username: _user?.email,
+            };
+        }
+        else { // if (payload.role == Role.ADMIN) 
+            const _user = await this.adminService.validateAdmin(payload.sub);
+            return {
+                _id: _user?.id,
+                role: _user?.role,
+                userId: _user?.id,
+                username: _user?.email,
+            };
+        }
     }
 }

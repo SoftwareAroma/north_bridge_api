@@ -5,9 +5,12 @@ import { CreateCartDto, CreateUserDto } from './dto/create.dto';
 import { LoginUserDto } from './dto/login.dto';
 import { User as UserModel } from '@prisma/client';
 import { UpdateCartDto, UpdateUserDto } from './dto/update.dto';
-import { UserJwtAuthGuard } from './guard';
-import { ApiResponse } from '@nestjs/swagger';
+import { JwtAuthGuard } from '@shared';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AuthResponse, BooleanResponse, StringResponse } from '@app/response/response.dto';
+import { UserResponse, UsersResponse } from './dto/response.dto';
 
+@ApiTags('User')
 @Controller({ path: 'user', version: '1' })
 export class UserController {
     constructor(
@@ -18,7 +21,7 @@ export class UserController {
     @ApiResponse({
         status: HttpStatus.CREATED,
         description: 'User registered successfully',
-        type: CustomApiResponse,
+        type: AuthResponse,
     })
     async registerUser(
         @Body() userDto: CreateUserDto,
@@ -37,7 +40,7 @@ export class UserController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'User logged in successfully',
-        type: CustomApiResponse,
+        type: AuthResponse,
     })
     async loginUser(
         @Body() userDto: LoginUserDto,
@@ -51,11 +54,46 @@ export class UserController {
         });
     }
 
-    @Get(':id')
+    @Get('users')
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Users fetched successfully',
+        type: UsersResponse,
+    })
+    async getAllUsers(): Promise<CustomApiResponse<{ users: UserModel[] }>> {
+        const _users = await this.userService.getUsers();
+        return new CustomApiResponse<{ users: UserModel[] }>({
+            data: { users: _users },
+            message: 'Users fetched successfully',
+            success: true,
+        });
+    }
+
+    @UseGuards(JwtAuthGuard,)
+    @Get('profile')
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'User profile fetched successfully',
+        type: UserResponse,
+    })
+    async getUserProfile(
+        @Req() request
+    ): Promise<CustomApiResponse<{ user: UserModel }>> {
+        // console.log(request.user)
+        const { userId } = request.user;
+        const _user = await this.userService.profile(userId);
+        return new CustomApiResponse<{ user: UserModel }>({
+            data: { user: _user },
+            message: 'User profile fetched successfully',
+            success: true,
+        });
+    }
+
+    @Get('user/:id')
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'User fetched successfully',
-        type: CustomApiResponse,
+        type: UserResponse,
     })
     async getUserById(
         @Param('id') id: string
@@ -68,45 +106,11 @@ export class UserController {
         });
     }
 
-    @Get('users')
-    @ApiResponse({
-        status: HttpStatus.OK,
-        description: 'Users fetched successfully',
-        type: CustomApiResponse,
-    })
-    async getAllUsers(): Promise<CustomApiResponse<{ users: UserModel[] }>> {
-        const _users = await this.userService.getUsers();
-        return new CustomApiResponse<{ users: UserModel[] }>({
-            data: { users: _users },
-            message: 'Users fetched successfully',
-            success: true,
-        });
-    }
-
-    @UseGuards(UserJwtAuthGuard,)
-    @Get('profile')
-    @ApiResponse({
-        status: HttpStatus.OK,
-        description: 'User profile fetched successfully',
-        type: CustomApiResponse,
-    })
-    async getUserProfile(
-        @Req() request
-    ): Promise<CustomApiResponse<{ user: UserModel }>> {
-        const { userId } = request.user;
-        const _user = await this.userService.profile(userId);
-        return new CustomApiResponse<{ user: UserModel }>({
-            data: { user: _user },
-            message: 'User profile fetched successfully',
-            success: true,
-        });
-    }
-
     @Patch('user/:id')
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'User updated successfully',
-        type: CustomApiResponse,
+        type: UserResponse,
     })
     async updateUser(
         @Param('id') id: string,
@@ -124,7 +128,7 @@ export class UserController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Cart added successfully',
-        type: CustomApiResponse,
+        type: UserResponse,
     })
     async addCart(
         @Param('id') id: string,
@@ -142,7 +146,7 @@ export class UserController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Cart updated successfully',
-        type: CustomApiResponse,
+        type: UserResponse,
     })
     async updateCart(
         @Param('id') id: string,
@@ -161,7 +165,7 @@ export class UserController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Cart removed successfully',
-        type: CustomApiResponse,
+        type: UserResponse,
     })
     async removeCart(
         @Param('id') id: string,
@@ -179,7 +183,7 @@ export class UserController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'User deleted successfully',
-        type: CustomApiResponse,
+        type: StringResponse,
     })
     async deleteUser(
         @Param('id') id: string,
@@ -198,7 +202,7 @@ export class UserController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'User logged out successfully',
-        type: CustomApiResponse,
+        type: BooleanResponse,
     })
     async logoutUser(
         @Res({ passthrough: true }) response

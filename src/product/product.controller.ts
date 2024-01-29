@@ -3,8 +3,9 @@ import { ProductService } from './product.service';
 import { CustomApiResponse } from '@shared/utils';
 import { Product as ProductModel } from '@prisma/client';
 import { CreateProductDto } from './dto/create.dto';
-import { ApiResponse } from '@nestjs/swagger';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Product')
 @Controller({ path: 'product', version: '1' })
 export class ProductController {
     constructor(

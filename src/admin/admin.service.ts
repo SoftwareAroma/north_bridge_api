@@ -49,7 +49,7 @@ export class AdminService {
         const _admin = await this.prismaService.admin.create({
             data: adminDto
         });
-        const payload = { sub: _admin.id, adminname: _admin.email };
+        const payload = { sub: _admin.id, adminname: _admin.email, role: _admin.role };
         const token = this.jwtService.sign(payload);
         response.cookie('access_token', token, {
             httpOnly: true,
@@ -79,7 +79,7 @@ export class AdminService {
         if (!isPasswordValid) {
             throw new HttpException('Invalid email or passowrd', HttpStatus.BAD_REQUEST);
         }
-        const payload = { sub: _admin.id, adminname: _admin.email };
+        const payload = { sub: _admin.id, adminname: _admin.email, role: _admin.role };
         const token = this.jwtService.sign(payload);
         response.cookie('access_token', token, {
             httpOnly: true,

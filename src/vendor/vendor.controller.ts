@@ -1,12 +1,16 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { VendorService } from './vendor.service';
 import { CreateVendorDto } from './dto/create.dto';
 import { LoginVendorDto } from './dto/login.dto';
 import { CustomApiResponse } from '@shared/utils';
 import { Vendor as VendorModel } from '@prisma/client';
 import { UpdateVendorDto } from './dto/update.dto';
-import { ApiResponse } from '@nestjs/swagger';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AuthResponse, BooleanResponse, StringResponse } from '@app/response/response.dto';
+import { VendorResponse, VendorsResponse } from './dto/response.dto';
+import { JwtAuthGuard } from '@shared';
 
+@ApiTags('Vendor')
 @Controller({ path: 'vendor', version: '1' })
 export class VendorController {
     constructor(
@@ -17,7 +21,7 @@ export class VendorController {
     @ApiResponse({
         status: HttpStatus.CREATED,
         description: 'Vendor created successfully',
-        type: CustomApiResponse,
+        type: AuthResponse,
     })
     async registerVendor(
         @Body() data: CreateVendorDto,
@@ -35,7 +39,7 @@ export class VendorController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Vendor logged in successfully',
-        type: CustomApiResponse,
+        type: AuthResponse,
     })
     async loginVendor(
         @Body() data: LoginVendorDto,
@@ -53,7 +57,7 @@ export class VendorController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Vendors fetched successfully',
-        type: CustomApiResponse,
+        type: VendorsResponse,
     })
     async getAllVendors(): Promise<CustomApiResponse<{ vendors: VendorModel[] }>> {
         const _vendors = await this.vendorService.getVendors();
@@ -64,11 +68,12 @@ export class VendorController {
         });
     }
 
+    @UseGuards(JwtAuthGuard,)
     @Get('profile')
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Vendor profile retrieved successfully',
-        type: CustomApiResponse,
+        type: VendorResponse,
     })
     async getVendorProfile(
         @Req() request,
@@ -86,7 +91,7 @@ export class VendorController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Vendor profile retrieved successfully',
-        type: CustomApiResponse,
+        type: VendorResponse
     })
     async getVendor(
         @Param('id') id: string,
@@ -103,7 +108,7 @@ export class VendorController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Vendor profile updated successfully',
-        type: CustomApiResponse,
+        type: VendorResponse
     })
     async updateVendor(
         @Param('id') id: string,
@@ -122,7 +127,7 @@ export class VendorController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Vendor logged out successfully',
-        type: CustomApiResponse,
+        type: BooleanResponse,
     })
     async logoutVendor(
         @Res({ passthrough: true }) response,
@@ -139,7 +144,7 @@ export class VendorController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Vendor deleted successfully',
-        type: CustomApiResponse,
+        type: StringResponse,
     })
     async deleteVendor(
         @Param('id') id: string,

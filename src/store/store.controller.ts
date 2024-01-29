@@ -4,8 +4,9 @@ import { StoreCategory as StoreCategoryModel, Store as StoreModel } from '@prism
 import { CreateStoreCategoryDto, CreateStoreDto } from './dto/create.dto';
 import { CustomApiResponse } from '@shared/utils';
 import { UpdateStoreCategoryDto, UpdateStoreDto } from './dto/update.dto';
-import { ApiResponse } from '@nestjs/swagger';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Store')
 @Controller({ path: 'store', version: '1' })
 export class StoreController {
     constructor(

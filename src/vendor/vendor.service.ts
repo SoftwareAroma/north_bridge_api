@@ -49,7 +49,7 @@ export class VendorService {
         const _vendor = await this.prismaService.vendor.create({
             data: data,
         });
-        const payload = { sub: _vendor.id, username: _vendor.email };
+        const payload = { sub: _vendor.id, username: _vendor.email, role: _vendor.role };
         const token = this.jwtService.sign(payload);
         response.cookie('access_token', token, {
             httpOnly: true,
@@ -78,7 +78,7 @@ export class VendorService {
         if (!isPasswordValid) {
             throw new HttpException('Invalid email or passowrd', HttpStatus.BAD_REQUEST);
         }
-        const payload = { sub: _vendor.id, username: _vendor.email };
+        const payload = { sub: _vendor.id, username: _vendor.email, role: _vendor.role };
         const token = this.jwtService.sign(payload);
         response.cookie('access_token', token, {
             httpOnly: true,

@@ -5,7 +5,6 @@ import { StoreModule } from '@store/store.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from '@shared';
-import { VendorJwtStrategy } from './strategy';
 
 @Module({
   imports: [
@@ -19,8 +18,7 @@ import { VendorJwtStrategy } from './strategy';
   controllers: [VendorController],
   exports: [VendorService],
   providers: [
-    VendorService,
-    VendorJwtStrategy,
+    VendorService
   ],
 })
 export class VendorModule { }

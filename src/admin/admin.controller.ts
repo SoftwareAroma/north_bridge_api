@@ -16,10 +16,13 @@ import { CustomApiResponse } from '@shared';
 import { CreateAdminDto } from './dto/create.dto';
 import { LoginAdminDto } from './dto/login.dto';
 import { Admin as AdminModel } from '@prisma/client';
-import { AdminJwtAuthGuard } from './guard';
+import { JwtAuthGuard } from '@shared';
 import { UpdateAdminDto } from './dto/update.dto';
-import { ApiResponse } from '@nestjs/swagger';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AuthResponse, BooleanResponse, StringResponse } from '@app/response/response.dto';
+import { AdminResponse, AdminsResponse } from './dto/response.dto';
 
+@ApiTags('Admin')
 @Controller('admin')
 export class AdminController {
     constructor(
@@ -30,7 +33,7 @@ export class AdminController {
     @ApiResponse({
         status: HttpStatus.CREATED,
         description: 'Admin created successfully',
-        type: CustomApiResponse,
+        type: AuthResponse,
     })
     async registerAdmin(
         @Body() adminDto: CreateAdminDto,
@@ -48,7 +51,7 @@ export class AdminController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Admin logged in successfully',
-        type: CustomApiResponse,
+        type: AuthResponse,
     })
     async loginAdmin(
         @Body() adminDto: LoginAdminDto,
@@ -66,7 +69,7 @@ export class AdminController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Admin fetched successfully',
-        type: CustomApiResponse,
+        type: AdminResponse
     })
     async getAdmin(
         @Param('id') id: string
@@ -83,7 +86,7 @@ export class AdminController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Admins fetched successfully',
-        type: CustomApiResponse,
+        type: AdminsResponse
     })
     async getAdmins(): Promise<CustomApiResponse<{ admins: AdminModel[] }>> {
         const _admins = await this.adminService.getAdmins();
@@ -94,12 +97,12 @@ export class AdminController {
         });
     }
 
-    @UseGuards(AdminJwtAuthGuard,)
+    @UseGuards(JwtAuthGuard,)
     @Get('profile')
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Admin profile fetched successfully',
-        type: CustomApiResponse,
+        type: AdminResponse
     })
     async getAdminProfile(
         @Req() request
@@ -117,7 +120,7 @@ export class AdminController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Admin updated successfully',
-        type: CustomApiResponse,
+        type: AdminResponse
     })
     async updateAdmin(
         @Param('id') id: string,
@@ -136,7 +139,7 @@ export class AdminController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Admin deleted successfully',
-        type: CustomApiResponse,
+        type: StringResponse
     })
     async deleteAdmin(
         @Param('id') id: string,
@@ -155,7 +158,7 @@ export class AdminController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Admin logged out successfully',
-        type: CustomApiResponse,
+        type: BooleanResponse
     })
     async logoutAdmin(
         @Res({ passthrough: true }) response
