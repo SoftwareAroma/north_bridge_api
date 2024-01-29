@@ -25,14 +25,11 @@ async function bootstrap() {
   const origin: string = configService.get<string>('FRONTEND_URL');
   // api version
   const apiVersion: string = configService.get<string>('API_VERSION');
-  const appName = 'NORTH BRIDDGE API';
+  const appName = 'NORTH BRIDDGE';
   const swaggerPath = 'swagger';
 
   app.setGlobalPrefix('api');
 
-
-  // global prefix
-  app.setGlobalPrefix('api');
   // enable CORS
   app.enableCors({
     origin: origin,

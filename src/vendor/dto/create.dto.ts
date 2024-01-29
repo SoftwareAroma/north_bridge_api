@@ -10,12 +10,6 @@ import {
 } from "class-validator";
 
 export class CreateVendorDto {
-
-    @IsString()
-    @IsNotEmpty()
-    @ApiProperty({ required: true })
-    name: string;
-
     @IsEmail()
     @IsNotEmpty()
     @ApiProperty({ required: true })

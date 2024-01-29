@@ -87,7 +87,7 @@ export class VendorController {
         });
     }
 
-    @Get(':id')
+    @Get('vender/:id')
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Vendor profile retrieved successfully',
@@ -104,7 +104,7 @@ export class VendorController {
         });
     }
 
-    @Patch(':id')
+    @Patch('vendor/:id')
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Vendor profile updated successfully',
@@ -140,7 +140,7 @@ export class VendorController {
         });
     }
 
-    @Delete(':id')
+    @Delete('vendor/:id')
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Vendor deleted successfully',
@@ -148,10 +148,10 @@ export class VendorController {
     })
     async deleteVendor(
         @Param('id') id: string,
-    ): Promise<CustomApiResponse<boolean>> {
-        await this.vendorService.deleteVendor(id);
-        return new CustomApiResponse<boolean>({
-            data: true,
+    ): Promise<CustomApiResponse<{ user: string }>> {
+        const _user = await this.vendorService.deleteVendor(id);
+        return new CustomApiResponse<{ user: string }>({
+            data: { user: _user },
             message: 'Vendor deleted successfully',
             success: true,
         });

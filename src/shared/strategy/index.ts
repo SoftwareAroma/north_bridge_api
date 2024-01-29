@@ -36,7 +36,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         });
     }
     async validate(payload: any) {
-        // console.log(payload)
+        // console.log(payload);
         if (payload.role == Role.USER) {
             const _user = await this.userService.validateUser(payload.sub);
             return {
@@ -45,7 +45,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
                 userId: _user?.id,
                 username: _user?.email,
             };
-        } else if (payload.role == Role.VENDOR) {
+        }
+        if (payload.role == Role.VENDOR) {
             const _user = await this.vendorService.validateVendor(payload.sub);
             return {
                 _id: _user?.id,
@@ -54,8 +55,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
                 username: _user?.email,
             };
         }
-        else { // if (payload.role == Role.ADMIN) 
+        if (payload.role == Role.ADMIN) { // 
+            // console.log(payload);
             const _user = await this.adminService.validateAdmin(payload.sub);
+            // console.log(_user);
             return {
                 _id: _user?.id,
                 role: _user?.role,

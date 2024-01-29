@@ -12,19 +12,20 @@ datasource db {
 
 // admin user
 model Admin {
-  id        String   @id @unique @default(cuid())
-  email     String   @unique
-  password  String
-  userName  String
-  firstName String
-  lastName  String
-  otherName String?
-  phone     String
-  salt      String?
-  isActive  Boolean  @default(true)
-  role      Role     @default(ADMIN)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String   @id @unique @default(cuid())
+  email           String   @unique
+  password        String
+  userName        String
+  firstName       String
+  lastName        String
+  otherName       String?
+  phone           String
+  salt            String?
+  isActive        Boolean  @default(true)
+  isEmailVerified Boolean  @default(false)
+  role            Role     @default(ADMIN)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 // vendor user

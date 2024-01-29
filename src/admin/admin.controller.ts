@@ -23,7 +23,7 @@ import { AuthResponse, BooleanResponse, StringResponse } from '@app/response/res
 import { AdminResponse, AdminsResponse } from './dto/response.dto';
 
 @ApiTags('Admin')
-@Controller('admin')
+@Controller({ path: 'admin', version: '1' })
 export class AdminController {
     constructor(
         private readonly adminService: AdminService,
@@ -65,23 +65,6 @@ export class AdminController {
         });
     }
 
-    @Get(':id')
-    @ApiResponse({
-        status: HttpStatus.OK,
-        description: 'Admin fetched successfully',
-        type: AdminResponse
-    })
-    async getAdmin(
-        @Param('id') id: string
-    ): Promise<CustomApiResponse<{ admin: AdminModel }>> {
-        const _admin = await this.adminService.getAdmin(id);
-        return new CustomApiResponse<{ admin: AdminModel }>({
-            data: { admin: _admin },
-            message: 'admin fetched successfully',
-            success: true,
-        });
-    }
-
     @Get('admins')
     @ApiResponse({
         status: HttpStatus.OK,
@@ -107,7 +90,7 @@ export class AdminController {
     async getAdminProfile(
         @Req() request
     ): Promise<CustomApiResponse<{ admin: AdminModel }>> {
-        const { userId } = request.admin;
+        const { userId } = request.user;
         const _admin = await this.adminService.profile(userId);
         return new CustomApiResponse<{ admin: AdminModel }>({
             data: { admin: _admin },
@@ -116,7 +99,24 @@ export class AdminController {
         });
     }
 
-    @Patch(':id')
+    @Get('admin/:id')
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Admin fetched successfully',
+        type: AdminResponse
+    })
+    async getAdmin(
+        @Param('id') id: string
+    ): Promise<CustomApiResponse<{ admin: AdminModel }>> {
+        const _admin = await this.adminService.getAdmin(id);
+        return new CustomApiResponse<{ admin: AdminModel }>({
+            data: { admin: _admin },
+            message: 'admin fetched successfully',
+            success: true,
+        });
+    }
+
+    @Patch('admin/:id')
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Admin updated successfully',
@@ -135,7 +135,7 @@ export class AdminController {
     }
 
 
-    @Delete(':id')
+    @Delete('admin/:id')
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Admin deleted successfully',

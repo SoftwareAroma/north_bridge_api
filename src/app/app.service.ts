@@ -6,7 +6,7 @@ export class AppService {
   constructor() { }
   welcome(): { message: string } {
     return {
-      message: `welcome to ${APP_NAME} ${API_VERSION}`,
+      message: `welcome to ${APP_NAME} API ${API_VERSION}`,
     };
   }
 }
