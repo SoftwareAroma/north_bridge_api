@@ -17,6 +17,12 @@ export class VendorController {
         private vendorService: VendorService,
     ) { }
 
+    /**
+     * Register a new vendor
+     * @param data [CreateVendorDto]
+     * @param response Response
+     * @returns access_token
+     */
     @Post('register')
     @ApiResponse({
         status: HttpStatus.CREATED,
@@ -35,6 +41,12 @@ export class VendorController {
         });
     }
 
+    /**
+     * Login a vendor
+     * @param data [LoginVendorDto]
+     * @param response Response
+     * @returns access_token
+     */
     @Post('login')
     @ApiResponse({
         status: HttpStatus.OK,
@@ -53,6 +65,10 @@ export class VendorController {
         });
     }
 
+    /**
+     * Get all vendors
+     * @returns List of all vendors
+     */
     @Get('vendors')
     @ApiResponse({
         status: HttpStatus.OK,
@@ -68,6 +84,11 @@ export class VendorController {
         });
     }
 
+    /**
+     * Get vendor profile
+     * @param request Request
+     * @returns Vendor profile
+     */
     @UseGuards(JwtAuthGuard,)
     @Get('profile')
     @ApiResponse({
@@ -87,6 +108,11 @@ export class VendorController {
         });
     }
 
+    /**
+     * Get vendor profile
+     * @param id Vendor id
+     * @returns Vendor profile
+     */
     @Get('vender/:id')
     @ApiResponse({
         status: HttpStatus.OK,
@@ -104,6 +130,12 @@ export class VendorController {
         });
     }
 
+    /**
+     * Update vendor profile
+     * @param id Vendor id
+     * @param data UpdateVendorDto
+     * @returns Vendor profile
+     */
     @Patch('vendor/:id')
     @ApiResponse({
         status: HttpStatus.OK,
@@ -122,7 +154,11 @@ export class VendorController {
         });
     }
 
-
+    /**
+     * Logout a vendor
+     * @param response Response
+     * @returns true
+     */
     @Get('logout')
     @ApiResponse({
         status: HttpStatus.OK,
@@ -140,6 +176,11 @@ export class VendorController {
         });
     }
 
+    /**
+     * Delete a vendor
+     * @param id Vendor id
+     * @returns Vendor id
+     */
     @Delete('vendor/:id')
     @ApiResponse({
         status: HttpStatus.OK,

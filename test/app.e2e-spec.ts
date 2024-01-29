@@ -19,6 +19,8 @@ describe('AppController (e2e)', () => {
     return request(app.getHttpServer())
       .get('/')
       .expect(200)
-      .expect('Hello World!');
+      .expect({
+        "message": "welcome to NORTH BRIDDGE API API 1.0.1"
+      });
   });
 });
