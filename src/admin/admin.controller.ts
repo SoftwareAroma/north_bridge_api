@@ -9,14 +9,16 @@ import {
     Delete,
     UseGuards,
     Req,
+    HttpStatus,
 } from '@nestjs/common';
 import { AdminService } from './admin.service';
-import { ApiResponse } from '@shared';
+import { CustomApiResponse } from '@shared';
 import { CreateAdminDto } from './dto/create.dto';
 import { LoginAdminDto } from './dto/login.dto';
 import { Admin as AdminModel } from '@prisma/client';
 import { AdminJwtAuthGuard } from './guard';
 import { UpdateAdminDto } from './dto/update.dto';
+import { ApiResponse } from '@nestjs/swagger';
 
 @Controller('admin')
 export class AdminController {
@@ -25,12 +27,17 @@ export class AdminController {
     ) { }
 
     @Post('register')
+    @ApiResponse({
+        status: HttpStatus.CREATED,
+        description: 'Admin created successfully',
+        type: CustomApiResponse,
+    })
     async registerAdmin(
         @Body() adminDto: CreateAdminDto,
         @Res({ passthrough: true }) response
-    ): Promise<ApiResponse<{ access_token: string }>> {
+    ): Promise<CustomApiResponse<{ access_token: string }>> {
         const _admin = await this.adminService.registerAdmin(adminDto, response);
-        return new ApiResponse<{ access_token: string }>({
+        return new CustomApiResponse<{ access_token: string }>({
             data: { access_token: _admin },
             message: 'admin logged in successfully',
             success: true,
@@ -38,12 +45,17 @@ export class AdminController {
     }
 
     @Post('login')
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Admin logged in successfully',
+        type: CustomApiResponse,
+    })
     async loginAdmin(
         @Body() adminDto: LoginAdminDto,
         @Res({ passthrough: true }) response
-    ): Promise<ApiResponse<{ access_token: string }>> {
+    ): Promise<CustomApiResponse<{ access_token: string }>> {
         const _admin = await this.adminService.loginAdmin(adminDto, response);
-        return new ApiResponse<{ access_token: string }>({
+        return new CustomApiResponse<{ access_token: string }>({
             data: { access_token: _admin },
             message: 'admin logged in successfully',
             success: true,
@@ -51,11 +63,16 @@ export class AdminController {
     }
 
     @Get(':id')
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Admin fetched successfully',
+        type: CustomApiResponse,
+    })
     async getAdmin(
         @Param('id') id: string
-    ): Promise<ApiResponse<{ admin: AdminModel }>> {
+    ): Promise<CustomApiResponse<{ admin: AdminModel }>> {
         const _admin = await this.adminService.getAdmin(id);
-        return new ApiResponse<{ admin: AdminModel }>({
+        return new CustomApiResponse<{ admin: AdminModel }>({
             data: { admin: _admin },
             message: 'admin fetched successfully',
             success: true,
@@ -63,9 +80,14 @@ export class AdminController {
     }
 
     @Get('admins')
-    async getAdmins(): Promise<ApiResponse<{ admins: AdminModel[] }>> {
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Admins fetched successfully',
+        type: CustomApiResponse,
+    })
+    async getAdmins(): Promise<CustomApiResponse<{ admins: AdminModel[] }>> {
         const _admins = await this.adminService.getAdmins();
-        return new ApiResponse<{ admins: AdminModel[] }>({
+        return new CustomApiResponse<{ admins: AdminModel[] }>({
             data: { admins: _admins },
             message: 'admins fetched successfully',
             success: true,
@@ -74,12 +96,17 @@ export class AdminController {
 
     @UseGuards(AdminJwtAuthGuard,)
     @Get('profile')
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Admin profile fetched successfully',
+        type: CustomApiResponse,
+    })
     async getAdminProfile(
         @Req() request
-    ): Promise<ApiResponse<{ admin: AdminModel }>> {
+    ): Promise<CustomApiResponse<{ admin: AdminModel }>> {
         const { userId } = request.admin;
         const _admin = await this.adminService.profile(userId);
-        return new ApiResponse<{ admin: AdminModel }>({
+        return new CustomApiResponse<{ admin: AdminModel }>({
             data: { admin: _admin },
             message: 'admin profile fetched successfully',
             success: true,
@@ -87,12 +114,17 @@ export class AdminController {
     }
 
     @Patch(':id')
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Admin updated successfully',
+        type: CustomApiResponse,
+    })
     async updateAdmin(
         @Param('id') id: string,
         @Body() adminDto: UpdateAdminDto
-    ): Promise<ApiResponse<{ admin: AdminModel }>> {
+    ): Promise<CustomApiResponse<{ admin: AdminModel }>> {
         const _admin = await this.adminService.updateAdmin(id, adminDto);
-        return new ApiResponse<{ admin: AdminModel }>({
+        return new CustomApiResponse<{ admin: AdminModel }>({
             data: { admin: _admin },
             message: 'admin updated successfully',
             success: true,
@@ -101,13 +133,18 @@ export class AdminController {
 
 
     @Delete(':id')
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Admin deleted successfully',
+        type: CustomApiResponse,
+    })
     async deleteAdmin(
         @Param('id') id: string,
         @Res({ passthrough: true }) response
-    ): Promise<ApiResponse<{ admin: string }>> {
+    ): Promise<CustomApiResponse<{ admin: string }>> {
         const _admin = await this.adminService.deleteAdmin(id);
         response.cookie('access_token', '', { maxAge: 1 });
-        return new ApiResponse<{ admin: string }>({
+        return new CustomApiResponse<{ admin: string }>({
             data: { admin: _admin },
             message: 'admin deleted successfully',
             success: true,
@@ -115,11 +152,16 @@ export class AdminController {
     }
 
     @Get('logout')
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Admin logged out successfully',
+        type: CustomApiResponse,
+    })
     async logoutAdmin(
         @Res({ passthrough: true }) response
-    ): Promise<ApiResponse<boolean>> {
+    ): Promise<CustomApiResponse<boolean>> {
         response.cookie('access_token', '', { maxAge: 1 });
-        return new ApiResponse<boolean>({
+        return new CustomApiResponse<boolean>({
             data: true,
             message: 'admin logged out successfully',
             success: true,

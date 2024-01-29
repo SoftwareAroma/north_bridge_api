@@ -1,10 +1,11 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Req, Res } from '@nestjs/common';
 import { VendorService } from './vendor.service';
 import { CreateVendorDto } from './dto/create.dto';
 import { LoginVendorDto } from './dto/login.dto';
-import { ApiResponse } from '@shared/utils';
+import { CustomApiResponse } from '@shared/utils';
 import { Vendor as VendorModel } from '@prisma/client';
 import { UpdateVendorDto } from './dto/update.dto';
+import { ApiResponse } from '@nestjs/swagger';
 
 @Controller({ path: 'vendor', version: '1' })
 export class VendorController {
@@ -13,12 +14,17 @@ export class VendorController {
     ) { }
 
     @Post('register')
+    @ApiResponse({
+        status: HttpStatus.CREATED,
+        description: 'Vendor created successfully',
+        type: CustomApiResponse,
+    })
     async registerVendor(
         @Body() data: CreateVendorDto,
         @Res({ passthrough: true }) response,
-    ): Promise<ApiResponse<{ access_token: string }>> {
+    ): Promise<CustomApiResponse<{ access_token: string }>> {
         const _token = await this.vendorService.createVendor(data, response);
-        return new ApiResponse<{ access_token: string }>({
+        return new CustomApiResponse<{ access_token: string }>({
             data: { access_token: _token },
             message: 'Vendor registered successfully',
             success: true,
@@ -26,12 +32,17 @@ export class VendorController {
     }
 
     @Post('login')
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Vendor logged in successfully',
+        type: CustomApiResponse,
+    })
     async loginVendor(
         @Body() data: LoginVendorDto,
         @Res({ passthrough: true }) response,
-    ): Promise<ApiResponse<{ access_token: string }>> {
+    ): Promise<CustomApiResponse<{ access_token: string }>> {
         const _token = await this.vendorService.loginVendor(data, response);
-        return new ApiResponse<{ access_token: string }>({
+        return new CustomApiResponse<{ access_token: string }>({
             data: { access_token: _token },
             message: 'Vendor logged in successfully',
             success: true,
@@ -39,9 +50,14 @@ export class VendorController {
     }
 
     @Get('vendors')
-    async getAllVendors(): Promise<ApiResponse<{ vendors: VendorModel[] }>> {
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Vendors fetched successfully',
+        type: CustomApiResponse,
+    })
+    async getAllVendors(): Promise<CustomApiResponse<{ vendors: VendorModel[] }>> {
         const _vendors = await this.vendorService.getVendors();
-        return new ApiResponse<{ vendors: VendorModel[] }>({
+        return new CustomApiResponse<{ vendors: VendorModel[] }>({
             data: { vendors: _vendors },
             message: 'Vendors fetched successfully',
             success: true,
@@ -49,12 +65,17 @@ export class VendorController {
     }
 
     @Get('profile')
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Vendor profile retrieved successfully',
+        type: CustomApiResponse,
+    })
     async getVendorProfile(
         @Req() request,
-    ): Promise<ApiResponse<{ vendor: VendorModel }>> {
+    ): Promise<CustomApiResponse<{ vendor: VendorModel }>> {
         const { userId } = request.user;
         const vendor = await this.vendorService.profile(userId);
-        return new ApiResponse<{ vendor: VendorModel }>({
+        return new CustomApiResponse<{ vendor: VendorModel }>({
             data: { vendor: vendor },
             message: 'Vendor profile retrieved successfully',
             success: true,
@@ -62,11 +83,16 @@ export class VendorController {
     }
 
     @Get(':id')
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Vendor profile retrieved successfully',
+        type: CustomApiResponse,
+    })
     async getVendor(
         @Param('id') id: string,
-    ): Promise<ApiResponse<{ vendor: VendorModel }>> {
+    ): Promise<CustomApiResponse<{ vendor: VendorModel }>> {
         const vendor = await this.vendorService.getVendor(id);
-        return new ApiResponse<{ vendor: VendorModel }>({
+        return new CustomApiResponse<{ vendor: VendorModel }>({
             data: { vendor: vendor },
             message: 'Vendor profile retrieved successfully',
             success: true,
@@ -74,12 +100,17 @@ export class VendorController {
     }
 
     @Patch(':id')
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Vendor profile updated successfully',
+        type: CustomApiResponse,
+    })
     async updateVendor(
         @Param('id') id: string,
         @Body() data: UpdateVendorDto,
-    ): Promise<ApiResponse<{ vendor: VendorModel }>> {
+    ): Promise<CustomApiResponse<{ vendor: VendorModel }>> {
         const vendor = await this.vendorService.updateVendor(id, data);
-        return new ApiResponse<{ vendor: VendorModel }>({
+        return new CustomApiResponse<{ vendor: VendorModel }>({
             data: { vendor: vendor },
             message: 'Vendor profile updated successfully',
             success: true,
@@ -88,11 +119,16 @@ export class VendorController {
 
 
     @Get('logout')
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Vendor logged out successfully',
+        type: CustomApiResponse,
+    })
     async logoutVendor(
         @Res({ passthrough: true }) response,
-    ): Promise<ApiResponse<boolean>> {
+    ): Promise<CustomApiResponse<boolean>> {
         response.cookie('access_token', '', { maxAge: 1 });
-        return new ApiResponse<boolean>({
+        return new CustomApiResponse<boolean>({
             data: true,
             message: 'User logged out successfully',
             success: true,
@@ -100,11 +136,16 @@ export class VendorController {
     }
 
     @Delete(':id')
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Vendor deleted successfully',
+        type: CustomApiResponse,
+    })
     async deleteVendor(
         @Param('id') id: string,
-    ): Promise<ApiResponse<boolean>> {
+    ): Promise<CustomApiResponse<boolean>> {
         await this.vendorService.deleteVendor(id);
-        return new ApiResponse<boolean>({
+        return new CustomApiResponse<boolean>({
             data: true,
             message: 'Vendor deleted successfully',
             success: true,

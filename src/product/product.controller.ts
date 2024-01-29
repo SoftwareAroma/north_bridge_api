@@ -1,8 +1,9 @@
-import { Body, Controller, Delete, Get, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Patch, Post } from '@nestjs/common';
 import { ProductService } from './product.service';
-import { ApiResponse } from '@shared/utils';
+import { CustomApiResponse } from '@shared/utils';
 import { Product as ProductModel } from '@prisma/client';
 import { CreateProductDto } from './dto/create.dto';
+import { ApiResponse } from '@nestjs/swagger';
 
 @Controller({ path: 'product', version: '1' })
 export class ProductController {
@@ -11,11 +12,16 @@ export class ProductController {
     ) { }
 
     @Post('create')
+    @ApiResponse({
+        status: HttpStatus.CREATED,
+        description: 'Product created successfully',
+        type: CustomApiResponse,
+    })
     async createProduct(
         @Body() data: CreateProductDto,
-    ): Promise<ApiResponse<{ product: ProductModel }>> {
+    ): Promise<CustomApiResponse<{ product: ProductModel }>> {
         const product = await this.productService.createProduct(data);
-        return new ApiResponse<{ product: ProductModel }>({
+        return new CustomApiResponse<{ product: ProductModel }>({
             data: { product: product },
             message: 'Product created successfully',
             success: true,
@@ -23,9 +29,14 @@ export class ProductController {
     }
 
     @Get('products')
-    async getProducts(): Promise<ApiResponse<{ products: Array<ProductModel> }>> {
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Products fetched successfully',
+        type: CustomApiResponse,
+    })
+    async getProducts(): Promise<CustomApiResponse<{ products: Array<ProductModel> }>> {
         const products = await this.productService.getProducts();
-        return new ApiResponse<{ products: Array<ProductModel> }>({
+        return new CustomApiResponse<{ products: Array<ProductModel> }>({
             data: { products: products },
             message: 'Products retrieved successfully',
             success: true,
@@ -33,11 +44,16 @@ export class ProductController {
     }
 
     @Get(':id')
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Product fetched successfully',
+        type: CustomApiResponse,
+    })
     async getProduct(
         @Body() id: string,
-    ): Promise<ApiResponse<{ product: ProductModel }>> {
+    ): Promise<CustomApiResponse<{ product: ProductModel }>> {
         const product = await this.productService.getProduct(id);
-        return new ApiResponse<{ product: ProductModel }>({
+        return new CustomApiResponse<{ product: ProductModel }>({
             data: { product: product },
             message: 'Product retrieved successfully',
             success: true,
@@ -45,12 +61,17 @@ export class ProductController {
     }
 
     @Patch(':id')
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Product updated successfully',
+        type: CustomApiResponse,
+    })
     async updateProduct(
         @Body() id: string,
         @Body() data: CreateProductDto,
-    ): Promise<ApiResponse<{ product: ProductModel }>> {
+    ): Promise<CustomApiResponse<{ product: ProductModel }>> {
         const product = await this.productService.updateProduct(id, data);
-        return new ApiResponse<{ product: ProductModel }>({
+        return new CustomApiResponse<{ product: ProductModel }>({
             data: { product: product },
             message: 'Product updated successfully',
             success: true,
@@ -58,11 +79,16 @@ export class ProductController {
     }
 
     @Delete(':id')
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Product deleted successfully',
+        type: CustomApiResponse,
+    })
     async deleteProduct(
         @Body() id: string,
-    ): Promise<ApiResponse<{ product: string }>> {
+    ): Promise<CustomApiResponse<{ product: string }>> {
         const product = await this.productService.deleteProduct(id);
-        return new ApiResponse<{ product: string }>({
+        return new CustomApiResponse<{ product: string }>({
             data: { product: product },
             message: 'Product deleted successfully',
             success: true,
