@@ -1,13 +1,12 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from '@shared/prisma/prisma.service';
-import { StoreService } from '@store/store.service';
 import { CreateVendorDto } from './dto/create.dto';
 import { Response } from 'express';
 import { comparePassword, generateSalt, getDefaultPropertyValue, hashPassword } from '@shared';
 import { JwtService } from '@nestjs/jwt';
 import { LoginVendorDto } from './dto/login.dto';
 import { UpdateVendorDto } from './dto/update.dto';
-import { Store as StoreModel, Vendor as VendorModel } from '@prisma/client';
+import { Vendor as VendorModel } from '@prisma/client';
 
 @Injectable()
 export class VendorService {

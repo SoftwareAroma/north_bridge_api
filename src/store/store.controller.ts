@@ -1,10 +1,40 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    HttpStatus,
+    Param,
+    Patch,
+    Post,
+    UseGuards,
+} from '@nestjs/common';
 import { StoreService } from './store.service';
-import { StoreCategory as StoreCategoryModel, Store as StoreModel } from '@prisma/client';
+import {
+    StoreCategory as StoreCategoryModel,
+    Store as StoreModel
+} from '@prisma/client';
 import { CreateStoreCategoryDto, CreateStoreDto } from './dto/create.dto';
 import { CustomApiResponse } from '@shared/utils';
 import { UpdateStoreCategoryDto, UpdateStoreDto } from './dto/update.dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { CheckPolicies, JwtAuthGuard, PoliciesGuard } from '@shared';
+import {
+    CreateStoreCategoryPolicyHandler,
+    CreateStorePolicyHandler,
+    DeleteStoreCategoryPolicyHandler,
+    DeleteStorePolicyHandler,
+    ReadStoreCategoryPolicyHandler,
+    UpdateStoreCategoryPolicyHandler,
+    UpdateStorePolicyHandler
+} from '@shared/casl/handler/policy.handler';
+import {
+    StoreCategoriesResponse,
+    StoreCategoryResponse,
+    StoreResponse,
+    StoresResponse
+} from './dto/response.dto';
+import { StringResponse } from '@app/response/response.dto';
 
 @ApiTags('Store')
 @Controller({ path: 'store', version: '1' })
@@ -18,11 +48,13 @@ export class StoreController {
      * @param data [CreateStoreDto]
      * @returns CustomApiResponse<{ store: StoreModel }>()
      */
+    @CheckPolicies(new CreateStorePolicyHandler())
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
     @Post('create')
     @ApiResponse({
         status: HttpStatus.CREATED,
         description: 'Store created successfully',
-        type: CustomApiResponse,
+        type: StoreResponse,
     })
     async createStore(
         @Body() data: CreateStoreDto,
@@ -40,11 +72,13 @@ export class StoreController {
      * @param data [CreateStoreCategoryDto]
      * @returns CustomApiResponse<{ storeCategory: StoreCategoryModel }>()
      */
+    @CheckPolicies(new CreateStoreCategoryPolicyHandler())
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
     @Post('create-category')
     @ApiResponse({
         status: HttpStatus.CREATED,
         description: 'Store category created successfully',
-        type: CustomApiResponse,
+        type: StoreCategoryResponse,
     })
     async createStoreCategory(
         @Body() data: CreateStoreCategoryDto,
@@ -65,7 +99,7 @@ export class StoreController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Stores fetched successfully',
-        type: CustomApiResponse,
+        type: StoresResponse,
     })
     async getStores(): Promise<CustomApiResponse<{ stores: StoreModel[] }>> {
         const _stores = await this.storeService.getStores();
@@ -80,11 +114,13 @@ export class StoreController {
      * Get all store categories
      * @returns CustomApiResponse<{ storeCategories: StoreCategoryModel[] }>()
      */
+    @CheckPolicies(new ReadStoreCategoryPolicyHandler())
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
     @Get('categories')
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Store categories fetched successfully',
-        type: CustomApiResponse,
+        type: StoreCategoriesResponse,
     })
     async getStoreCategories(): Promise<CustomApiResponse<{ storeCategories: StoreCategoryModel[] }>> {
         const _storeCategories = await this.storeService.getStoreCategories();
@@ -104,7 +140,7 @@ export class StoreController {
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Store fetched successfully',
-        type: CustomApiResponse,
+        type: StoreResponse,
     })
     async getStore(id: string): Promise<CustomApiResponse<{ store: StoreModel }>> {
         const _store = await this.storeService.getStore(id);
@@ -120,11 +156,13 @@ export class StoreController {
      * @param id id of store category to get
      * @returns CustomApiResponse<{ storeCategory: StoreCategoryModel }>()
      */
+    @CheckPolicies(new ReadStoreCategoryPolicyHandler())
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
     @Get('category/:id')
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Store category fetched successfully',
-        type: CustomApiResponse,
+        type: StoreCategoryResponse,
     })
     async getStoreCategory(id: string): Promise<CustomApiResponse<{ storeCategory: StoreCategoryModel }>> {
         const _storeCategory = await this.storeService.getStoreCategory(id);
@@ -141,11 +179,13 @@ export class StoreController {
      * @param data [UpdateStoreDto]
      * @returns CustomApiResponse<{ store: StoreModel }>()
      */
+    @CheckPolicies(new UpdateStorePolicyHandler())
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
     @Patch(':id')
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Store updated successfully',
-        type: CustomApiResponse,
+        type: StoreResponse,
     })
     async updateStore(
         @Param('id') id: string,
@@ -165,11 +205,13 @@ export class StoreController {
      * @param data [UpdateStoreCategoryDto]
      * @returns CustomApiResponse<{ storeCategory: StoreCategoryModel }>()
      */
+    @CheckPolicies(new UpdateStoreCategoryPolicyHandler())
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
     @Patch('category/:id')
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Store category updated successfully',
-        type: CustomApiResponse,
+        type: StoreCategoryResponse,
     })
     async updateStoreCategory(
         @Param('id') id: string,
@@ -189,11 +231,13 @@ export class StoreController {
      * @param categoryId category id to add
      * @returns CustomApiResponse<{ store: StoreModel }>()
      */
+    @CheckPolicies(new UpdateStorePolicyHandler())
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
     @Patch('add-category/:id')
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Store updated successfully',
-        type: CustomApiResponse,
+        type: StoreResponse,
     })
     async addCategory(
         @Param('id') id: string,
@@ -213,11 +257,13 @@ export class StoreController {
      * @param categoryId category id to remove
      * @returns CustomApiResponse<{ store: StoreModel }>()
      */
+    @CheckPolicies(new UpdateStorePolicyHandler())
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
     @Patch('remove-category/:id')
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Store updated successfully',
-        type: CustomApiResponse,
+        type: StoreResponse,
     })
     async removeCategory(
         @Param('id') id: string,
@@ -237,11 +283,13 @@ export class StoreController {
      * @param productId id of product to add
      * @returns CustomApiResponse<{ store: StoreModel }>()
      */
+    @CheckPolicies(new UpdateStorePolicyHandler())
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
     @Patch('add-product/:id')
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Store updated successfully',
-        type: CustomApiResponse,
+        type: StoreResponse,
     })
     async addProduct(
         @Param('id') id: string,
@@ -261,11 +309,13 @@ export class StoreController {
      * @param productId id of product to remove
      * @returns CustomApiResponse<{ store: StoreModel }>()
      */
+    @CheckPolicies(new UpdateStorePolicyHandler())
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
     @Patch('remove-product/:id')
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Store updated successfully',
-        type: CustomApiResponse,
+        type: StoreResponse,
     })
     async removeProduct(
         @Param('id') id: string,
@@ -284,11 +334,13 @@ export class StoreController {
      * @param id id of store to delete
      * @returns CustomApiResponse<{ store: string }>()
      */
+    @CheckPolicies(new DeleteStorePolicyHandler())
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
     @Delete(':id')
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Store deleted successfully',
-        type: CustomApiResponse,
+        type: StringResponse,
     })
     async deleteStore(id: string): Promise<CustomApiResponse<{ store: string }>> {
         const _store = await this.storeService.deleteStore(id);
@@ -304,11 +356,13 @@ export class StoreController {
      * @param id id of store category to delete
      * @returns CustomApiResponse<{ store: string }>()
      */
+    @CheckPolicies(new DeleteStoreCategoryPolicyHandler())
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
     @Delete('category/:id')
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Store category deleted successfully',
-        type: CustomApiResponse,
+        type: StringResponse,
     })
     async deleteStoreCategory(id: string): Promise<CustomApiResponse<{ storeCategory: string }>> {
         const _storeCategory = await this.storeService.deleteStoreCategory(id);

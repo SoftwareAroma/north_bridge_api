@@ -1,4 +1,16 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    HttpStatus,
+    Param,
+    Patch,
+    Post,
+    Req,
+    Res,
+    UseGuards
+} from '@nestjs/common';
 import { VendorService } from './vendor.service';
 import { CreateVendorDto } from './dto/create.dto';
 import { LoginVendorDto } from './dto/login.dto';
@@ -6,9 +18,22 @@ import { CustomApiResponse } from '@shared/utils';
 import { Vendor as VendorModel } from '@prisma/client';
 import { UpdateVendorDto } from './dto/update.dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { AuthResponse, BooleanResponse, StringResponse } from '@app/response/response.dto';
+import {
+    AuthResponse,
+    BooleanResponse,
+    StringResponse
+} from '@app/response/response.dto';
 import { VendorResponse, VendorsResponse } from './dto/response.dto';
-import { JwtAuthGuard } from '@shared';
+import {
+    CheckPolicies,
+    JwtAuthGuard,
+    PoliciesGuard
+} from '@shared';
+import {
+    DeleteVendorPolicyHandler,
+    ReadVendorPolicyHandler,
+    UpdateVendorPolicyHandler
+} from '@shared/casl/handler/policy.handler';
 
 @ApiTags('Vendor')
 @Controller({ path: 'vendor', version: '1' })
@@ -89,7 +114,8 @@ export class VendorController {
      * @param request Request
      * @returns Vendor profile
      */
-    @UseGuards(JwtAuthGuard,)
+    @CheckPolicies(new ReadVendorPolicyHandler())
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
     @Get('profile')
     @ApiResponse({
         status: HttpStatus.OK,
@@ -136,6 +162,8 @@ export class VendorController {
      * @param data UpdateVendorDto
      * @returns Vendor profile
      */
+    @CheckPolicies(new UpdateVendorPolicyHandler())
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
     @Patch('vendor/:id')
     @ApiResponse({
         status: HttpStatus.OK,
@@ -181,6 +209,8 @@ export class VendorController {
      * @param id Vendor id
      * @returns Vendor id
      */
+    @CheckPolicies(new DeleteVendorPolicyHandler())
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
     @Delete('vendor/:id')
     @ApiResponse({
         status: HttpStatus.OK,
