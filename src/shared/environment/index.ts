@@ -6,13 +6,11 @@ const DOMAINS: string = process.env.DOMAINS
 const DATABASE_URL: string = process.env.DATABASE_URL
 const ORIGIN_URL: string = process.env.ORIGIN_URL
 const UPLOADS_DIR: string = process.env.UPLOADS_DIR
-const STRIPE_SECRET_KEY: string = process.env.STRIPE_SECRET_KEY
-const CLOUDINARY_NAME: string = process.env.CLOUDINARY_NAME
-const CLOUDINARY_API_KEY: string = process.env.CLOUDINARY_API_KEY
-const CLOUDINARY_API_SECRET: string = process.env.CLOUDINARY_API_SECRET
 const API_VERSION: string = process.env.API_VERSION
 const APP_NAME: string = process.env.APP_NAME
 const SWAGGER_PATH: string = process.env.SWAGGER_PATH
+const PAY_STACK_API_KEY: string = process.env.PAY_STACK_API_KEY
+const PAY_STACK_CURRENCY: string = process.env.PAY_STACK_CURRENCY
 // JWT VARIABLES
 const JWT_SECRET: string = process.env.JWT_SECRET
 const JWT_ALGORITHM: string = process.env.JWT_ALGORITHM
@@ -24,16 +22,14 @@ export const configuration = () => ({
     DATABASE_URL,
     ORIGIN_URL,
     UPLOADS_DIR,
-    STRIPE_SECRET_KEY,
-    CLOUDINARY_NAME,
-    CLOUDINARY_API_KEY,
-    CLOUDINARY_API_SECRET,
     API_VERSION,
     JWT_SECRET,
     JWT_ALGORITHM,
     JWT_EXPIRES_IN,
     SWAGGER_PATH,
     APP_NAME,
+    PAY_STACK_API_KEY,
+    PAY_STACK_CURRENCY,
 });
 
 export {
@@ -42,14 +38,12 @@ export {
     DATABASE_URL,
     ORIGIN_URL,
     UPLOADS_DIR,
-    STRIPE_SECRET_KEY,
-    CLOUDINARY_NAME,
-    CLOUDINARY_API_KEY,
-    CLOUDINARY_API_SECRET,
     API_VERSION,
     JWT_SECRET,
     JWT_ALGORITHM,
     JWT_EXPIRES_IN,
     SWAGGER_PATH,
     APP_NAME,
+    PAY_STACK_API_KEY,
+    PAY_STACK_CURRENCY,
 }

@@ -24,7 +24,7 @@ export class StoreCategoryObject {
 
 class StoreCategoryDataRes {
     @ApiProperty({ type: StoreCategoryObject })
-    storeCategory: StoreResponseObject;
+    storeCategory: StoreCategoryObject;
 }
 
 export class StoreCategoryResponse {

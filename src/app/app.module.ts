@@ -12,6 +12,7 @@ import { VendorModule } from '@vendor/vendor.module';
 import { AdminModule } from '@admin/admin.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
+import { PaymentModule } from 'src/payment/payment.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { JwtModule } from '@nestjs/jwt';
     ProductModule,
     StoreModule,
     VendorModule,
+    PaymentModule,
 
     // prisma for database query and connection
     PrismaModule,

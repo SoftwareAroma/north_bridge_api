@@ -84,6 +84,7 @@ export class CaslAbilityFactory {
           'ProductCategoryModel',
         ]
       );
+      can(Actions.Create, ['StoreModel', 'ProductModel', 'StoreCategoryModel', 'ProductCategoryModel']);
       can(Actions.Manage, 'StoreModel', { vendorId: user.id });
       can(Actions.Manage, ['StoreCategoryModel', 'ProductCategoryModel'])
       can(Actions.Manage, ['ProductModel'], { store: { vendorId: user.id } });
