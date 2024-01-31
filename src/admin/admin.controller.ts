@@ -12,7 +12,7 @@ import {
     HttpStatus,
 } from '@nestjs/common';
 import { AdminService } from './admin.service';
-import { CustomApiResponse } from '@shared';
+import { CheckPolicies, CustomApiResponse, PoliciesGuard } from '@shared';
 import { CreateAdminDto } from './dto/create.dto';
 import { LoginAdminDto } from './dto/login.dto';
 import { Admin as AdminModel } from '@prisma/client';
@@ -21,6 +21,11 @@ import { UpdateAdminDto } from './dto/update.dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthResponse, BooleanResponse, StringResponse } from '@app/response/response.dto';
 import { AdminResponse, AdminsResponse } from './dto/response.dto';
+import {
+    DeleteAdminPolicyHandler,
+    ReadAdminPolicyHandler,
+    UpdateAdminPolicyHandler
+} from '@shared/casl/handler/policy.handler';
 
 @ApiTags('Admin')
 @Controller({ path: 'admin', version: '1' })
@@ -80,7 +85,8 @@ export class AdminController {
         });
     }
 
-    @UseGuards(JwtAuthGuard,)
+    @CheckPolicies(new ReadAdminPolicyHandler())
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
     @Get('profile')
     @ApiResponse({
         status: HttpStatus.OK,
@@ -99,6 +105,7 @@ export class AdminController {
         });
     }
 
+
     @Get('admin/:id')
     @ApiResponse({
         status: HttpStatus.OK,
@@ -116,6 +123,8 @@ export class AdminController {
         });
     }
 
+    @CheckPolicies(new UpdateAdminPolicyHandler())
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
     @Patch('admin/:id')
     @ApiResponse({
         status: HttpStatus.OK,
@@ -135,6 +144,8 @@ export class AdminController {
     }
 
 
+    @CheckPolicies(new DeleteAdminPolicyHandler())
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
     @Delete('admin/:id')
     @ApiResponse({
         status: HttpStatus.OK,
