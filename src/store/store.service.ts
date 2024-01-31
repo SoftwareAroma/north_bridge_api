@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from '@shared/prisma/prisma.service';
 import { CreateStoreCategoryDto, CreateStoreDto } from './dto/create.dto';
 import { UpdateStoreCategoryDto, UpdateStoreDto } from './dto/update.dto';
@@ -20,7 +20,7 @@ export class StoreService {
             data: {
                 ...createStoreDto,
                 categories: {
-                    connect: createStoreDto.storeCategories.map((storeCategoryId) => {
+                    connect: createStoreDto.storeCategories?.map((storeCategoryId) => {
                         return {
                             id: storeCategoryId,
                         };
@@ -36,6 +36,9 @@ export class StoreService {
      * @returns [Store] object
      */
     async getStore(id: string): Promise<StoreModel> {
+        if (!id) {
+            throw new Error('Store id is required');
+        };
         return await this.prismaService.store.findUnique({
             where: {
                 id: id,
@@ -189,6 +192,17 @@ export class StoreService {
     ///-----------------------------------------------------
 
     async createStoreCategory(createStoreCategoryDto: CreateStoreCategoryDto): Promise<StoreCategoryModel> {
+        // make the name lower case
+        createStoreCategoryDto.name = createStoreCategoryDto.name.toLowerCase();
+        // if the category already exists, throw an error
+        const _category = await this.prismaService.storeCategory.findUnique({
+            where: {
+                name: createStoreCategoryDto.name,
+            },
+        });
+        if (_category) {
+            throw new HttpException('Store Category already Exist', HttpStatus.CONFLICT);
+        }
         return await this.prismaService.storeCategory.create({
             data: createStoreCategoryDto,
         });

@@ -35,7 +35,7 @@ import {
     UpdateVendorPolicyHandler
 } from '@shared/casl/handler/policy.handler';
 
-@ApiTags('Vendor')
+@ApiTags('Vendor Endpoints')
 @Controller({ path: 'vendor', version: '1' })
 export class VendorController {
     constructor(
@@ -139,7 +139,7 @@ export class VendorController {
      * @param id Vendor id
      * @returns Vendor profile
      */
-    @Get('vender/:id')
+    @Get('vendor/:id')
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Vendor profile retrieved successfully',

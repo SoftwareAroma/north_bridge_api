@@ -23,6 +23,8 @@ export class UserService {
      * @returns access_token
      */
     async registerUser(userDto: CreateUserDto, response: Response): Promise<string> {
+        // make the email lowercase
+        userDto.email = userDto.email.toLowerCase();
         // check if user already exist
         const _userExist = await this.prismaService.user.findUnique({
             where: {
@@ -65,6 +67,8 @@ export class UserService {
      * @returns access_token
      */
     async loginUser(user: LoginUserDto, response: Response): Promise<string> {
+        // make the email lowercase
+        user.email = user.email.toLowerCase();
         const _user = await this.prismaService.user.findUnique({
             where: {
                 email: user.email
@@ -159,14 +163,21 @@ export class UserService {
      * @returns [User] object without password and salt
      */
     async updateUser(id: string, user: UpdateUserDto): Promise<UserModel> {
-        const _user = await this.prismaService.user.update({
+        const _user = await this.prismaService.user.findUnique({
             where: { id: id },
-            data: user
         });
         if (!_user) {
             throw new HttpException('User not found', HttpStatus.NOT_FOUND);
         }
-        return this.exclude(_user, ['password', 'salt']);
+        // if user tries to update email
+        if (user.email && user.email !== _user.email) {
+            throw new HttpException('Email cannot be changed', HttpStatus.BAD_REQUEST);
+        }
+        const _updatedUser = await this.prismaService.user.update({
+            where: { id: id },
+            data: user
+        });
+        return this.exclude(_updatedUser, ['password', 'salt']);
     }
 
     /**

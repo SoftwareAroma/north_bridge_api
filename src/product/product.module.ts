@@ -5,6 +5,8 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from '@shared';
 import { CaslModule } from '@shared/casl/casl.module';
+import { MulterModule } from '@nestjs/platform-express';
+import { MulterConfigService } from './multer/multier.service';
 
 @Module({
   imports: [
@@ -13,6 +15,9 @@ import { CaslModule } from '@shared/casl/casl.module';
     JwtModule.register({
       secret: jwtConstants.secret,
       signOptions: { expiresIn: jwtConstants.expiresIn },
+    }),
+    MulterModule.registerAsync({
+      useClass: MulterConfigService,
     }),
   ],
   providers: [ProductService],

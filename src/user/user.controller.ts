@@ -14,7 +14,7 @@ import {
     UpdateUserPolicyHandler
 } from '@shared/casl/handler/policy.handler';
 
-@ApiTags('User')
+@ApiTags('User Endpoints')
 @Controller({ path: 'user', version: '1' })
 export class UserController {
     constructor(

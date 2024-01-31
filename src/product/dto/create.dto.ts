@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { ProductStatus } from "@prisma/client";
-import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsArray, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString } from "class-validator";
 
 export class CreateProductDto {
     @IsString()
@@ -11,10 +11,14 @@ export class CreateProductDto {
     @ApiProperty({ required: true })
     description: string;
 
-    @IsNumber()
+
+    @IsObject()
     @IsNotEmpty()
-    @ApiProperty({ required: true })
-    price: number;
+    @ApiProperty({ required: true, default: { amount: 0, currency: "GHS" } })
+    price: {
+        "amount": number,
+        "currency": string,
+    };
 
     @IsNumber()
     @IsNotEmpty()
@@ -34,7 +38,7 @@ export class CreateProductDto {
     @IsString({ each: true })
     @IsNotEmpty({ each: true })
     @ApiProperty({ required: true })
-    images: [string];
+    images: string[];
 
     @IsString()
     @ApiProperty({ required: true })
@@ -44,5 +48,12 @@ export class CreateProductDto {
     @IsString({ each: true })
     @IsNotEmpty({ each: true })
     @ApiProperty({ required: true })
-    categories: [string];
+    categories: string[];
+}
+
+
+export class CreateProductCategoryDto {
+    @IsString()
+    @ApiProperty({ required: true })
+    name: string;
 }
