@@ -27,7 +27,7 @@ import {
     UpdateAdminPolicyHandler
 } from '@shared/casl/handler/policy.handler';
 
-@ApiTags('Admin')
+@ApiTags('Admin Endpoints')
 @Controller({ path: 'admin', version: '1' })
 export class AdminController {
     constructor(

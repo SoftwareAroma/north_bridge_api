@@ -149,14 +149,21 @@ export class AdminService {
      * @returns [admin] object without password and salt
      */
     async updateAdmin(id: string, admin: UpdateAdminDto): Promise<AdminModel> {
-        const _admin = await this.prismaService.admin.update({
+        const _admin = await this.prismaService.admin.findUnique({
             where: { id: id },
-            data: admin
         });
         if (!_admin) {
             throw new HttpException('Admin not found', HttpStatus.NOT_FOUND);
         }
-        return this.exclude(_admin, ['password', 'salt']);
+        // if the email is not empty and is different from the current email
+        if (admin.email && admin.email !== _admin.email) {
+            throw new HttpException('Email cannot be changed', HttpStatus.BAD_REQUEST);
+        }
+        const updatedadmin = await this.prismaService.admin.update({
+            where: { id: id },
+            data: admin,
+        });
+        return this.exclude(updatedadmin, ['password', 'salt']);
     }
 
     /**

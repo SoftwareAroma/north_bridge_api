@@ -179,13 +179,26 @@ export class VendorService {
      * @returns [VendorModel]
      */
     async updateVendor(id: string, data: UpdateVendorDto): Promise<VendorModel> {
-        const _vender = await this.prismaService.vendor.update({
+        const _vender = await this.prismaService.vendor.findUnique({
+            where: {
+                id: id,
+            },
+        });
+        if (!_vender) {
+            throw new HttpException('Vendor not found', HttpStatus.NOT_FOUND);
+        }
+        // if user tries to update email
+        if (data.email && data.email !== _vender.email) {
+            throw new HttpException('Email cannot be changed', HttpStatus.BAD_REQUEST);
+        }
+
+        const _vendor = await this.prismaService.vendor.update({
             where: {
                 id: id,
             },
             data: data,
         });
-        return this.exclude(_vender, ['password', 'salt']);
+        return this.exclude(_vendor, ['password', 'salt']);
     }
 
     /**

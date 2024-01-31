@@ -6,7 +6,7 @@ import { StoreModule } from '@store/store.module';
 import { UserModule } from '@user/user.module';
 import { PrismaModule } from '@shared/prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
-import { JwtStrategy, configuration, jwtConstants } from '@shared';
+import { JwtStrategy, UPLOADS_DIR, configuration, jwtConstants } from '@shared';
 import * as Joi from 'joi';
 import { VendorModule } from '@vendor/vendor.module';
 import { AdminModule } from '@admin/admin.module';
@@ -32,6 +32,7 @@ import { PaymentModule } from 'src/payment/payment.module';
       signOptions: { expiresIn: jwtConstants.expiresIn },
     }),
 
+
     /// prevent brute force attack
     // ThrottlerModule.forRoot({
     //   ttl: 60,
@@ -45,6 +46,7 @@ import { PaymentModule } from 'src/payment/payment.module';
       cache: true,
       expandVariables: true,
       validationSchema: Joi.object({
+        UPLOADS_DIR: Joi.string().required(),
         NODE_ENV: Joi.string()
           .valid('development', 'production', 'test', 'provision')
           .default('development'),
