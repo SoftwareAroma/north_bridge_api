@@ -44,6 +44,9 @@
       "@shared/*": ["src/shared/*"],
       "@shared": ["src/shared"],
 
+      "@casl": ["src/shared/casl"],
+      "@casl/*": ["src/shared/casl/*"],
+
     }
   }
 }

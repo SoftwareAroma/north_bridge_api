@@ -1,14 +1,18 @@
 import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CustomApiResponse } from '@shared';
+import { CustomApiResponse, PoliciesGuard, JwtAuthGuard, CheckPolicies } from '@shared';
 import { CreateCartDto, CreateUserDto } from './dto/create.dto';
 import { LoginUserDto } from './dto/login.dto';
 import { User as UserModel } from '@prisma/client';
 import { UpdateCartDto, UpdateUserDto } from './dto/update.dto';
-import { JwtAuthGuard } from '@shared';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthResponse, BooleanResponse, StringResponse } from '@app/response/response.dto';
 import { UserResponse, UsersResponse } from './dto/response.dto';
+import {
+    DeleteUserPolicyHandler,
+    ReadUserPolicyHandler,
+    UpdateUserPolicyHandler
+} from '@shared/casl/handler/policy.handler';
 
 @ApiTags('User')
 @Controller({ path: 'user', version: '1' })
@@ -69,7 +73,8 @@ export class UserController {
         });
     }
 
-    @UseGuards(JwtAuthGuard,)
+    @CheckPolicies(new ReadUserPolicyHandler())
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
     @Get('profile')
     @ApiResponse({
         status: HttpStatus.OK,
@@ -106,6 +111,8 @@ export class UserController {
         });
     }
 
+    @CheckPolicies(new UpdateUserPolicyHandler())
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
     @Patch('user/:id')
     @ApiResponse({
         status: HttpStatus.OK,
@@ -124,6 +131,8 @@ export class UserController {
         });
     }
 
+    @CheckPolicies(new UpdateUserPolicyHandler())
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
     @Patch('add-cart/:id')
     @ApiResponse({
         status: HttpStatus.OK,
@@ -142,6 +151,8 @@ export class UserController {
         });
     }
 
+    @CheckPolicies(new UpdateUserPolicyHandler())
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
     @Patch('update-cart/:id/:cartId')
     @ApiResponse({
         status: HttpStatus.OK,
@@ -161,6 +172,8 @@ export class UserController {
         });
     }
 
+    @CheckPolicies(new UpdateUserPolicyHandler())
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
     @Patch('remove-cart/:id')
     @ApiResponse({
         status: HttpStatus.OK,
@@ -179,6 +192,8 @@ export class UserController {
         });
     }
 
+    @CheckPolicies(new DeleteUserPolicyHandler())
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
     @Delete('user/:id')
     @ApiResponse({
         status: HttpStatus.OK,

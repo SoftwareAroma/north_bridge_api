@@ -5,10 +5,11 @@ import { StoreModule } from '@store/store.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from '@shared';
+import { CaslModule } from '@shared/casl/casl.module';
 
 @Module({
   imports: [
-    StoreModule,
+    CaslModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: jwtConstants.secret,

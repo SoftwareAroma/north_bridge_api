@@ -1,9 +1,13 @@
-import { Body, Controller, Delete, Get, HttpStatus, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Patch, Post, UseGuards } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CustomApiResponse } from '@shared/utils';
 import { Product as ProductModel } from '@prisma/client';
 import { CreateProductDto } from './dto/create.dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { CheckPolicies, JwtAuthGuard, PoliciesGuard } from '@shared';
+import { CreateProductPolicyHandler, DeleteProductPolicyHandler, UpdateProductCategoryPolicyHandler } from '@shared/casl/handler/policy.handler';
+import { ProductResponse, ProductsResponse } from './dto/response.dto';
+import { StringResponse } from '@app/response/response.dto';
 
 @ApiTags('Product')
 @Controller({ path: 'product', version: '1' })
@@ -12,11 +16,13 @@ export class ProductController {
         private productService: ProductService,
     ) { }
 
+    @CheckPolicies(new CreateProductPolicyHandler())
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
     @Post('create')
     @ApiResponse({
         status: HttpStatus.CREATED,
         description: 'Product created successfully',
-        type: CustomApiResponse,
+        type: ProductResponse,
     })
     async createProduct(
         @Body() data: CreateProductDto,
@@ -29,11 +35,12 @@ export class ProductController {
         });
     }
 
+
     @Get('products')
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Products fetched successfully',
-        type: CustomApiResponse,
+        type: ProductsResponse,
     })
     async getProducts(): Promise<CustomApiResponse<{ products: Array<ProductModel> }>> {
         const products = await this.productService.getProducts();
@@ -44,11 +51,12 @@ export class ProductController {
         });
     }
 
+
     @Get(':id')
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Product fetched successfully',
-        type: CustomApiResponse,
+        type: ProductResponse,
     })
     async getProduct(
         @Body() id: string,
@@ -61,11 +69,13 @@ export class ProductController {
         });
     }
 
+    @CheckPolicies(new UpdateProductCategoryPolicyHandler())
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
     @Patch(':id')
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Product updated successfully',
-        type: CustomApiResponse,
+        type: ProductResponse,
     })
     async updateProduct(
         @Body() id: string,
@@ -79,11 +89,13 @@ export class ProductController {
         });
     }
 
+    @CheckPolicies(new DeleteProductPolicyHandler())
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
     @Delete(':id')
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Product deleted successfully',
-        type: CustomApiResponse,
+        type: StringResponse,
     })
     async deleteProduct(
         @Body() id: string,
