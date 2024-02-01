@@ -3,6 +3,7 @@ import { PaymentService } from './payment.service';
 import { CreatePaymentDto } from './dto/create.dto';
 import { ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@shared/guard';
+import { TransactionResponse, VerifyTransactionRespnse } from './dto/response.dto';
 
 @Controller('payment')
 export class PaymentController {
@@ -14,8 +15,8 @@ export class PaymentController {
     @Post('initialize')
     @ApiResponse({
         status: 200,
-        description: 'Get all transactions',
-        type: Object,
+        description: 'initialize payment',
+        type: TransactionResponse,
     })
     async createPayment(
         @Body() body: CreatePaymentDto,
@@ -27,8 +28,8 @@ export class PaymentController {
     @Post('verify')
     @ApiResponse({
         status: 200,
-        description: 'Get all transactions',
-        type: Object,
+        description: 'Verify payment',
+        type: VerifyTransactionRespnse,
     })
     async verifyPayment(
         @Body() body: { reference: string },
@@ -41,7 +42,8 @@ export class PaymentController {
     @ApiResponse({
         status: 200,
         description: 'Get all transactions',
-        type: Object,
+        type: VerifyTransactionRespnse,
+        isArray: true,
     })
     async getTransactions() {
         return this.paymentService.transactions();
