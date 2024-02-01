@@ -19,6 +19,17 @@ export class PaymentService {
     async createPayment(dataDto: CreatePaymentDto) {
         const { amount, currency, email } = dataDto;
 
+        // if either amount, currency or email is null
+        if (!amount) {
+            throw new HttpException("Amount,is required", HttpStatus.BAD_REQUEST);
+        }
+        if (!currency) {
+            throw new HttpException("Currency is required", HttpStatus.BAD_REQUEST);
+        }
+        if (!email) {
+            throw new HttpException("Email is required", HttpStatus.BAD_REQUEST);
+        }
+
         const params = JSON.stringify({
             "email": email,
             "amount": amount * 100,
@@ -51,6 +62,10 @@ export class PaymentService {
      * @returns response from paystack [Object]
      */
     async verifyPayment(reference: string) {
+        // if reference is null
+        if (!reference) {
+            throw new HttpException("Reference is required", HttpStatus.BAD_REQUEST);
+        }
         const headers = {
             Authorization: `Bearer ${PAY_STACK_API_KEY}`,
             'Content-Type': 'application/json'

@@ -1,17 +1,164 @@
 import { ApiProperty } from "@nestjs/swagger";
 
+class TransactionDataObject {
+    @ApiProperty()
+    authorization_url: string;
+    @ApiProperty()
+    access_code: string;
+    @ApiProperty()
+    reference: string;
+}
 export class TransactionResponse {
     @ApiProperty()
     status: boolean;
     @ApiProperty()
     message: string;
-    @ApiProperty()
-    data: {
-        authorization_url: string,
-        access_code: string,
-        reference: string
-    }
+    @ApiProperty({ type: TransactionDataObject })
+    data: TransactionDataObject;
 }
+
+
+class HistoryObject {
+    @ApiProperty()
+    type: string;
+    @ApiProperty()
+    message: string;
+    @ApiProperty()
+    time: number;
+}
+
+class LogObject {
+    @ApiProperty()
+    start_time: number;
+    @ApiProperty()
+    time_spent: number;
+    @ApiProperty()
+    attempts: number;
+    @ApiProperty()
+    errors: number;
+    @ApiProperty()
+    success: true;
+    @ApiProperty()
+    mobile: false;
+    @ApiProperty({ type: [] })
+    input: [];
+    @ApiProperty({ type: [HistoryObject] })
+    history: HistoryObject[]
+}
+
+class AuthorizationObject {
+    @ApiProperty()
+    authorization_code: string;
+    @ApiProperty()
+    bin: number;
+    @ApiProperty()
+    last4: number;
+    @ApiProperty()
+    exp_month: number;
+    @ApiProperty()
+    exp_year: number;
+    @ApiProperty()
+    channel: string;
+    @ApiProperty()
+    card_type: string;
+    @ApiProperty()
+    bank: string;
+    @ApiProperty()
+    country_code: string;
+    @ApiProperty()
+    brand: string;
+    @ApiProperty()
+    reusable: string;
+    @ApiProperty()
+    signature: string;
+    @ApiProperty()
+    account_name: string
+}
+
+class CustomerObject {
+    @ApiProperty()
+    id: number;
+    @ApiProperty()
+    first_name: string;
+    @ApiProperty()
+    last_name: string;
+    @ApiProperty()
+    email: string;
+    @ApiProperty()
+    customer_code: string;
+    @ApiProperty()
+    phone: string;
+    @ApiProperty()
+    metadata: string;
+    @ApiProperty()
+    risk_action: string;
+    @ApiProperty()
+    international_format_phone: string;
+}
+
+class VerifyTransactionDataObject {
+    @ApiProperty()
+    id: number;
+    @ApiProperty()
+    domain: string;
+    @ApiProperty()
+    status: string;
+    @ApiProperty()
+    reference: string;
+    @ApiProperty()
+    amount: number;
+    @ApiProperty()
+    message: String;
+    @ApiProperty()
+    gateway_response: String;
+    @ApiProperty()
+    paid_at: string;
+    @ApiProperty()
+    created_at: string;
+    @ApiProperty()
+    channel: string;
+    @ApiProperty()
+    currency: string;
+    @ApiProperty()
+    ip_address: string;
+    @ApiProperty()
+    metadata: string;
+    @ApiProperty({ type: LogObject })
+    log: LogObject;
+    @ApiProperty()
+    fees: number;
+    @ApiProperty()
+    fees_split: object;
+    @ApiProperty({ type: AuthorizationObject })
+    authorization: AuthorizationObject;
+    @ApiProperty({ type: CustomerObject })
+    customer: CustomerObject;
+    @ApiProperty()
+    plan: string;
+    @ApiProperty()
+    split: object;
+    @ApiProperty()
+    order_id: string;
+    @ApiProperty()
+    paidAt: string;
+    @ApiProperty()
+    createdAt: string;
+    @ApiProperty()
+    requested_amount: number;
+    @ApiProperty()
+    pos_transaction_data: object;
+    @ApiProperty()
+    source: string;
+    @ApiProperty()
+    fees_breakdown: object;
+    @ApiProperty()
+    transaction_date: string;
+    @ApiProperty()
+    plan_object: object;
+    @ApiProperty()
+    subaccount: object;
+}
+
 
 export class VerifyTransactionRespnse {
     @ApiProperty()
@@ -19,80 +166,5 @@ export class VerifyTransactionRespnse {
     @ApiProperty()
     message: string;
     @ApiProperty()
-    data: {
-        id: number,
-        domain: string,
-        status: string,
-        reference: string,
-        amount: number,
-        message: String,
-        gateway_response: String,
-        paid_at: string,
-        created_at: string,
-        channel: string,
-        currency: string,
-        ip_address: string,
-        metadata: string,
-        log: {
-            start_time: number,
-            time_spent: number,
-            attempts: number,
-            errors: number,
-            success: true,
-            mobile: false,
-            input: [],
-            history: [
-                {
-                    type: string,
-                    message: string,
-                    time: number
-                },
-                {
-                    type: string,
-                    message: string,
-                    time: number
-                }
-            ]
-        },
-        fees: number,
-        fees_split: any,
-        authorization: {
-            authorization_code: string,
-            bin: number,
-            last4: number,
-            exp_month: number,
-            exp_year: number,
-            channel: string,
-            card_type: string,
-            bank: string,
-            country_code: string,
-            brand: string,
-            reusable: string,
-            signature: string,
-            account_name: any
-        },
-        customer: {
-            id: number,
-            first_name: any,
-            last_name: any,
-            email: string,
-            customer_code: string,
-            phone: any,
-            metadata: any,
-            risk_action: string,
-            international_format_phone: any
-        },
-        plan: any,
-        split: {},
-        order_id: any,
-        paidAt: string,
-        createdAt: string,
-        requested_amount: number,
-        pos_transaction_data: any,
-        source: any,
-        fees_breakdown: any,
-        transaction_date: string,
-        plan_object: object,
-        subaccount: object,
-    }
+    data: VerifyTransactionDataObject;
 }
