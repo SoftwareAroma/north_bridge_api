@@ -1,10 +1,12 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Post, UseGuards } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { CreatePaymentDto } from './dto/create.dto';
-import { ApiResponse } from '@nestjs/swagger';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@shared/guard';
+import { TransactionResponse, VerifyTransactionRespnse } from './dto/response.dto';
 
 @Controller('payment')
+@ApiTags('Payment Endpoints')
 export class PaymentController {
     constructor(
         private readonly paymentService: PaymentService,
@@ -13,9 +15,9 @@ export class PaymentController {
     @UseGuards(JwtAuthGuard)
     @Post('initialize')
     @ApiResponse({
-        status: 200,
-        description: 'Get all transactions',
-        type: Object,
+        status: HttpStatus.OK,
+        description: 'initialize payment',
+        type: TransactionResponse,
     })
     async createPayment(
         @Body() body: CreatePaymentDto,
@@ -26,9 +28,9 @@ export class PaymentController {
     @UseGuards(JwtAuthGuard)
     @Post('verify')
     @ApiResponse({
-        status: 200,
-        description: 'Get all transactions',
-        type: Object,
+        status: HttpStatus.OK,
+        description: 'Verify payment',
+        type: VerifyTransactionRespnse,
     })
     async verifyPayment(
         @Body() body: { reference: string },
@@ -39,9 +41,10 @@ export class PaymentController {
     @UseGuards(JwtAuthGuard)
     @Get('transactions')
     @ApiResponse({
-        status: 200,
+        status: HttpStatus.OK,
         description: 'Get all transactions',
-        type: Object,
+        type: VerifyTransactionRespnse,
+        isArray: true,
     })
     async getTransactions() {
         return this.paymentService.transactions();
