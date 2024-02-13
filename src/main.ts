@@ -25,9 +25,8 @@ async function bootstrap() {
   const origin: string = configService.get<string>('FRONTEND_URL');
   // api version
   const apiVersion: string = configService.get<string>('API_VERSION');
-  const appName = 'NORTH BRIDDGE';
+  const appName = 'NORTH BRIDGE';
   const swaggerPath = 'swagger';
-
   app.setGlobalPrefix('api');
 
   // enable CORS
