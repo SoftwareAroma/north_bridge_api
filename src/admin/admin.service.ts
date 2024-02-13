@@ -1,6 +1,12 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { comparePassword, generateSalt, getDefaultPropertyValue, hashPassword } from '@shared';
+import {
+    comparePassword,
+    generateSalt,
+    getDefaultPropertyValue,
+    hashPassword,
+    PayLoad
+} from '@shared';
 import { PrismaService } from '@shared/prisma/prisma.service';
 import { CreateAdminDto } from './dto/create.dto';
 import { Response } from 'express';
@@ -17,14 +23,14 @@ export class AdminService {
 
     /**
      * Create or Register a new admin and set the access_token in the cookie
-     * take the admin details through the CreateadminDto
-     * @param adminDto [CreateadminDto]
+     * take the admin details through the CreateAdminDto
+     * @param adminDto
      * @param response access token to be set in the cookie
      * @returns access_token
      */
     async registerAdmin(adminDto: CreateAdminDto, response: Response): Promise<string> {
         // check if admin already exist
-        const _adminExist = await this.prismaService.admin.findUnique({
+        const _adminExist: AdminModel = await this.prismaService.admin.findUnique({
             where: {
                 email: adminDto.email
             }
@@ -36,7 +42,7 @@ export class AdminService {
         if (adminDto.password.length < 8) {
             throw new HttpException('Password must be at least 8 characters', HttpStatus.BAD_REQUEST);
         }
-        const salt = await generateSalt();
+        const salt: string = await generateSalt();
 
         // add the salt to the dto
         adminDto.salt = salt;
@@ -46,11 +52,11 @@ export class AdminService {
             salt,
         );
 
-        const _admin = await this.prismaService.admin.create({
+        const _admin : AdminModel = await this.prismaService.admin.create({
             data: adminDto
         });
-        const payload = { sub: _admin.id, adminname: _admin.email, role: _admin.role };
-        const token = this.jwtService.sign(payload);
+        const payload: PayLoad = { sub: _admin.id, username: _admin.email, role: _admin.role };
+        const token: string = this.jwtService.sign(payload);
         response.cookie('access_token', token, {
             httpOnly: true,
         });
@@ -59,13 +65,13 @@ export class AdminService {
 
     /**
      * Login an admin and set the access_token in the cookie
-     * take the admin email and password through the LoginadminDto
-     * @param admin [LoginadminDto] - admin to login credentials
+     * take the admin email and password through the LoginAdminDto
+     * @param admin
      * @param response access_token to be set in the cookie
      * @returns access_token
      */
     async loginAdmin(admin: LoginAdminDto, response: Response): Promise<string> {
-        const _admin = await this.prismaService.admin.findUnique({
+        const _admin: AdminModel = await this.prismaService.admin.findUnique({
             where: {
                 email: admin.email
             }
@@ -75,12 +81,12 @@ export class AdminService {
             throw new HttpException(`No account found for admin with email ${admin.email}`, HttpStatus.NOT_FOUND);
         }
 
-        const isPasswordValid = await comparePassword(admin.password, _admin.password);
+        const isPasswordValid: boolean = await comparePassword(admin.password, _admin.password);
         if (!isPasswordValid) {
-            throw new HttpException('Invalid email or passowrd', HttpStatus.BAD_REQUEST);
+            throw new HttpException('Invalid email or password', HttpStatus.BAD_REQUEST);
         }
-        const payload = { sub: _admin.id, adminname: _admin.email, role: _admin.role };
-        const token = this.jwtService.sign(payload);
+        const payload: PayLoad = { sub: _admin.id, username: _admin.email, role: _admin.role };
+        const token : string = this.jwtService.sign(payload);
         response.cookie('access_token', token, {
             httpOnly: true,
         });
@@ -88,12 +94,12 @@ export class AdminService {
     }
 
     /**
-     * Validate a admin by id
+     * Validate an admin by id
      * @param id the admin id to validate
      * @returns [admin] object without password and salt
      */
     async validateAdmin(id: string): Promise<AdminModel | null> {
-        const _admin = await this.prismaService.admin.findUnique({
+        const _admin: AdminModel = await this.prismaService.admin.findUnique({
             where: { id: id },
         });
         // console.log(_admin)
@@ -109,7 +115,7 @@ export class AdminService {
      * @returns [admin] object without password and salt
      */
     async profile(id: string): Promise<AdminModel> {
-        const _admin = await this.prismaService.admin.findUnique({
+        const _admin: AdminModel = await this.prismaService.admin.findUnique({
             where: { id: id }
         });
         if (!_admin) {
@@ -119,12 +125,12 @@ export class AdminService {
     }
 
     /**
-     * Get the profile of a admin by id
+     * Get the profile of an admin by id
      * @param id admin id to get profile
      * @returns [admin] object without password and salt
      */
     async getAdmin(id: string): Promise<AdminModel> {
-        const _admin = await this.prismaService.admin.findUnique({
+        const _admin: AdminModel = await this.prismaService.admin.findUnique({
             where: { id: id }
         });
         if (!_admin) {
@@ -138,18 +144,18 @@ export class AdminService {
      * @returns [admin[]] array of admins without password and salt
      */
     async getAdmins(): Promise<AdminModel[]> {
-        const _admins = await this.prismaService.admin.findMany();
-        return _admins.map(admin => this.exclude(admin, ['password', 'salt']));
+        const _admins:Array<AdminModel> = await this.prismaService.admin.findMany();
+        return _admins.map((admin:AdminModel) => this.exclude(admin, ['password', 'salt']));
     }
 
     /**
-     * Update a admin profile
+     * Update an admin profile
      * @param id admin id to update profile
-     * @param admin [UpdateadminDto]
+     * @param admin
      * @returns [admin] object without password and salt
      */
     async updateAdmin(id: string, admin: UpdateAdminDto): Promise<AdminModel> {
-        const _admin = await this.prismaService.admin.findUnique({
+        const _admin: AdminModel = await this.prismaService.admin.findUnique({
             where: { id: id },
         });
         if (!_admin) {
@@ -159,11 +165,11 @@ export class AdminService {
         if (admin.email && admin.email !== _admin.email) {
             throw new HttpException('Email cannot be changed', HttpStatus.BAD_REQUEST);
         }
-        const updatedadmin = await this.prismaService.admin.update({
+        const updatedAdmin :AdminModel = await this.prismaService.admin.update({
             where: { id: id },
             data: admin,
         });
-        return this.exclude(updatedadmin, ['password', 'salt']);
+        return this.exclude(updatedAdmin, ['password', 'salt']);
     }
 
     /**
@@ -172,7 +178,7 @@ export class AdminService {
      * @returns [AdminModel] object without password and salt
      */
     async deleteAdmin(id: string): Promise<string> {
-        const _admin = await this.prismaService.admin.delete({
+        const _admin: AdminModel = await this.prismaService.admin.delete({
             where: { id: id },
         });
         if (!_admin) {
@@ -188,10 +194,10 @@ export class AdminService {
      * @param keys
      * @private
      */
-    private exclude<CustomerModel, Key extends keyof CustomerModel>(
-        admin: CustomerModel,
+    private exclude<AdminModel, Key extends keyof AdminModel>(
+        admin: AdminModel,
         keys: Key[],
-    ): CustomerModel {
+    ): AdminModel {
         for (const key of keys) {
             // Populate the value with a default value of its type
             admin[key] = getDefaultPropertyValue(admin[key]);

@@ -1,6 +1,14 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Role } from "@prisma/client";
-import { IsBoolean, IsEmail, IsNotEmpty, IsNumber, IsOptional, IsPhoneNumber, IsString, IsStrongPassword } from "class-validator";
+import {
+    IsBoolean,
+    IsEmail,
+    IsNotEmpty,
+    IsOptional,
+    IsPhoneNumber,
+    IsString,
+    IsStrongPassword
+} from "class-validator";
 
 export class CreateAdminDto {
     @IsEmail()

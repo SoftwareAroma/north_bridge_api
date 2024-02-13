@@ -21,7 +21,7 @@ export class PaymentController {
     })
     async createPayment(
         @Body() body: CreatePaymentDto,
-    ) {
+    ): Promise<any> {
         return this.paymentService.createPayment(body);
     }
 
@@ -34,7 +34,7 @@ export class PaymentController {
     })
     async verifyPayment(
         @Body() body: { reference: string },
-    ) {
+    ): Promise<any> {
         return this.paymentService.verifyPayment(body.reference);
     }
 
@@ -46,7 +46,7 @@ export class PaymentController {
         type: VerifyTransactionRespnse,
         isArray: true,
     })
-    async getTransactions() {
+    async getTransactions(): Promise<any> {
         return this.paymentService.transactions();
     }
 

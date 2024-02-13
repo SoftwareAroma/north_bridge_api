@@ -1,29 +1,30 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { PrismaService } from '@shared/prisma/prisma.service';
-import { CreateVendorDto } from './dto/create.dto';
-import { Response } from 'express';
-import { comparePassword, generateSalt, getDefaultPropertyValue, hashPassword } from '@shared';
-import { JwtService } from '@nestjs/jwt';
-import { LoginVendorDto } from './dto/login.dto';
-import { UpdateVendorDto } from './dto/update.dto';
-import { Vendor as VendorModel } from '@prisma/client';
+import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
+import {PrismaService} from '@shared/prisma/prisma.service';
+import {CreateVendorDto} from './dto/create.dto';
+import {Response} from 'express';
+import {comparePassword, generateSalt, getDefaultPropertyValue, hashPassword, PayLoad} from '@shared';
+import {JwtService} from '@nestjs/jwt';
+import {LoginVendorDto} from './dto/login.dto';
+import {UpdateVendorDto} from './dto/update.dto';
+import {Vendor as VendorModel} from '@prisma/client';
 
 @Injectable()
 export class VendorService {
     constructor(
         private readonly prismaService: PrismaService,
         private readonly jwtService: JwtService,
-    ) { }
+    ) {
+    }
 
     /**
      * Register a new vendor
-     * @param data [CreateVendorDto]
-     * @param response [Response]
      * @returns [string]
+     * @param data
+     * @param response
      */
     async createVendor(data: CreateVendorDto, response: Response): Promise<string> {
         // check if vendor already exist with email
-        const vendorExist = await this.prismaService.vendor.findUnique({
+        const vendorExist: VendorModel = await this.prismaService.vendor.findUnique({
             where: {
                 email: data.email,
             },
@@ -35,7 +36,7 @@ export class VendorService {
         if (data.password.length < 8) {
             throw new HttpException('Password must be at least 8 characters', HttpStatus.BAD_REQUEST);
         }
-        const salt = await generateSalt();
+        const salt: string = await generateSalt();
 
         // add the salt to the dto
         data.salt = salt;
@@ -45,11 +46,11 @@ export class VendorService {
             salt,
         );
 
-        const _vendor = await this.prismaService.vendor.create({
+        const _vendor: VendorModel = await this.prismaService.vendor.create({
             data: data,
         });
-        const payload = { sub: _vendor.id, username: _vendor.email, role: _vendor.role };
-        const token = this.jwtService.sign(payload);
+        const payload: PayLoad = {sub: _vendor.id, username: _vendor.email, role: _vendor.role};
+        const token: string = this.jwtService.sign(payload);
         response.cookie('access_token', token, {
             httpOnly: true,
         });
@@ -58,12 +59,12 @@ export class VendorService {
 
     /**
      * Login a vendor
-     * @param data [LoginVendorDto]
-     * @param response [Response]
      * @returns string
+     * @param data
+     * @param response
      */
     async loginVendor(data: LoginVendorDto, response: Response): Promise<string> {
-        const _vendor = await this.prismaService.vendor.findUnique({
+        const _vendor: VendorModel = await this.prismaService.vendor.findUnique({
             where: {
                 email: data.email,
             },
@@ -73,12 +74,12 @@ export class VendorService {
             throw new HttpException(`No account found for vendor with email ${_vendor.email}`, HttpStatus.NOT_FOUND);
         }
 
-        const isPasswordValid = await comparePassword(data.password, _vendor.password);
+        const isPasswordValid:boolean = await comparePassword(data.password, _vendor.password);
         if (!isPasswordValid) {
-            throw new HttpException('Invalid email or passowrd', HttpStatus.BAD_REQUEST);
+            throw new HttpException('Invalid email or password', HttpStatus.BAD_REQUEST);
         }
-        const payload = { sub: _vendor.id, username: _vendor.email, role: _vendor.role };
-        const token = this.jwtService.sign(payload);
+        const payload: PayLoad = {sub: _vendor.id, username: _vendor.email, role: _vendor.role};
+        const token: string = this.jwtService.sign(payload);
         response.cookie('access_token', token, {
             httpOnly: true,
         });
@@ -90,7 +91,7 @@ export class VendorService {
      * @returns [Array<VendorModel>]
      */
     async getVendors(): Promise<Array<VendorModel>> {
-        const _vendors = await this.prismaService.vendor.findMany({
+        const _vendors: Array<VendorModel>  = await this.prismaService.vendor.findMany({
             include: {
                 stores: {
                     include: {
@@ -103,7 +104,7 @@ export class VendorService {
                 },
             },
         });
-        return _vendors.map((vendor) => this.exclude(vendor, ['password', 'salt']));
+        return _vendors.map((vendor: VendorModel ) => this.exclude(vendor, ['password', 'salt']));
     }
 
     /**
@@ -112,8 +113,8 @@ export class VendorService {
      * @returns [User] object without password and salt
      */
     async validateVendor(id: string): Promise<VendorModel | null> {
-        const _user = await this.prismaService.vendor.findUnique({
-            where: { id: id },
+        const _user: VendorModel  = await this.prismaService.vendor.findUnique({
+            where: {id: id},
         });
         // console.log(_user)
         if (!_user) {
@@ -128,7 +129,7 @@ export class VendorService {
      * @returns [VendorModel]
      */
     async profile(id: string): Promise<VendorModel> {
-        const _vendor = await this.prismaService.vendor.findUnique({
+        const _vendor: VendorModel  = await this.prismaService.vendor.findUnique({
             where: {
                 id: id,
             },
@@ -153,7 +154,7 @@ export class VendorService {
      * @returns [VendorModel]
      */
     async getVendor(id: string): Promise<VendorModel> {
-        const _vendor = await this.prismaService.vendor.findUnique({
+        const _vendor: VendorModel  = await this.prismaService.vendor.findUnique({
             where: {
                 id: id,
             },
@@ -175,30 +176,30 @@ export class VendorService {
     /**
      * Update a vendor
      * @param id id of vendor to update
-     * @param data [UpdateVendorDto]
+     * @param data
      * @returns [VendorModel]
      */
     async updateVendor(id: string, data: UpdateVendorDto): Promise<VendorModel> {
-        const _vender = await this.prismaService.vendor.findUnique({
+        const _vendor: VendorModel  = await this.prismaService.vendor.findUnique({
             where: {
                 id: id,
             },
         });
-        if (!_vender) {
+        if (!_vendor) {
             throw new HttpException('Vendor not found', HttpStatus.NOT_FOUND);
         }
         // if user tries to update email
-        if (data.email && data.email !== _vender.email) {
+        if (data.email && data.email !== _vendor.email) {
             throw new HttpException('Email cannot be changed', HttpStatus.BAD_REQUEST);
         }
 
-        const _vendor = await this.prismaService.vendor.update({
+        const _updatedVendor: VendorModel  = await this.prismaService.vendor.update({
             where: {
                 id: id,
             },
             data: data,
         });
-        return this.exclude(_vendor, ['password', 'salt']);
+        return this.exclude(_updatedVendor, ['password', 'salt']);
     }
 
     /**
@@ -207,7 +208,7 @@ export class VendorService {
      * @returns string
      */
     async deleteVendor(id: string): Promise<string> {
-        const _vendor = await this.prismaService.vendor.delete({
+        const _vendor: VendorModel  = await this.prismaService.vendor.delete({
             where: {
                 id: id,
             },
@@ -222,10 +223,10 @@ export class VendorService {
      * @param keys
      * @private
      */
-    private exclude<CustomerModel, Key extends keyof CustomerModel>(
-        user: CustomerModel,
+    private exclude<VendorModel, Key extends keyof VendorModel>(
+        user: VendorModel,
         keys: Key[],
-    ): CustomerModel {
+    ): VendorModel {
         for (const key of keys) {
             // Populate the value with a default value of its type
             user[key] = getDefaultPropertyValue(user[key]);

@@ -26,6 +26,7 @@ import {
     ReadAdminPolicyHandler,
     UpdateAdminPolicyHandler
 } from '@shared/casl/handler/policy.handler';
+import {Response} from "express";
 
 @ApiTags('Admin Endpoints')
 @Controller({ path: 'admin', version: '1' })
@@ -42,7 +43,7 @@ export class AdminController {
     })
     async registerAdmin(
         @Body() adminDto: CreateAdminDto,
-        @Res({ passthrough: true }) response
+        @Res({ passthrough: true }) response: Response
     ): Promise<CustomApiResponse<{ access_token: string }>> {
         const _admin = await this.adminService.registerAdmin(adminDto, response);
         return new CustomApiResponse<{ access_token: string }>({
@@ -60,7 +61,7 @@ export class AdminController {
     })
     async loginAdmin(
         @Body() adminDto: LoginAdminDto,
-        @Res({ passthrough: true }) response
+        @Res({ passthrough: true }) response: Response
     ): Promise<CustomApiResponse<{ access_token: string }>> {
         const _admin = await this.adminService.loginAdmin(adminDto, response);
         return new CustomApiResponse<{ access_token: string }>({
@@ -94,7 +95,7 @@ export class AdminController {
         type: AdminResponse
     })
     async getAdminProfile(
-        @Req() request
+        @Req() request: any
     ): Promise<CustomApiResponse<{ admin: AdminModel }>> {
         const { userId } = request.user;
         const _admin = await this.adminService.profile(userId);
@@ -154,7 +155,7 @@ export class AdminController {
     })
     async deleteAdmin(
         @Param('id') id: string,
-        @Res({ passthrough: true }) response
+        @Res({ passthrough: true }) response: Response
     ): Promise<CustomApiResponse<{ admin: string }>> {
         const _admin = await this.adminService.deleteAdmin(id);
         response.cookie('access_token', '', { maxAge: 1 });
@@ -172,7 +173,7 @@ export class AdminController {
         type: BooleanResponse
     })
     async logoutAdmin(
-        @Res({ passthrough: true }) response
+        @Res({ passthrough: true }) response: Response
     ): Promise<CustomApiResponse<boolean>> {
         response.cookie('access_token', '', { maxAge: 1 });
         return new CustomApiResponse<boolean>({

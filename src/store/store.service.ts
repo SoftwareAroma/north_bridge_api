@@ -11,16 +11,16 @@ export class StoreService {
     ) { }
 
     /**
-     * Create a new store (for a vender)
-     * @param createStoreDto [CreateStoreDto]
+     * Create a new store (for a vendor)
      * @returns [Store] object
+     * @param createStoreDto
      */
     async createStore(createStoreDto: CreateStoreDto): Promise<StoreModel> {
-        return await this.prismaService.store.create({
+        return this.prismaService.store.create({
             data: {
                 ...createStoreDto,
                 categories: {
-                    connect: createStoreDto.categories?.map((storeCategoryId) => {
+                    connect: createStoreDto.categories?.map((storeCategoryId:string): {id:string} => {
                         return {
                             id: storeCategoryId,
                         };
@@ -38,8 +38,8 @@ export class StoreService {
     async getStore(id: string): Promise<StoreModel> {
         if (!id) {
             throw new Error('Store id is required');
-        };
-        return await this.prismaService.store.findUnique({
+        }
+        return this.prismaService.store.findUnique({
             where: {
                 id: id,
             },
@@ -55,7 +55,7 @@ export class StoreService {
      * @returns [Store] objects
      */
     async getStores(): Promise<Array<StoreModel>> {
-        return await this.prismaService.store.findMany({
+        return this.prismaService.store.findMany({
             include: {
                 products: true,
                 categories: true,
@@ -66,18 +66,18 @@ export class StoreService {
     /**
      * Update a Store
      * @param id id of the store to update
-     * @param updateStoreDto [UpdateStoreDto]
+     * @param updateStoreDto
      * @returns [Store] object
      */
     async updateStore(id: string, updateStoreDto: UpdateStoreDto): Promise<StoreModel> {
-        return await this.prismaService.store.update({
+        return this.prismaService.store.update({
             where: {
                 id: id,
             },
             data: {
                 ...updateStoreDto,
                 categories: {
-                    connect: updateStoreDto.categories?.map((storeCategoryId) => {
+                    connect: updateStoreDto.categories?.map((storeCategoryId:string): {id:string} => {
                         return {
                             id: storeCategoryId,
                         };
@@ -93,7 +93,7 @@ export class StoreService {
      * @returns 
      */
     async deleteStore(id: string): Promise<string> {
-        var resp = await this.prismaService.store.delete({
+        const resp:StoreModel = await this.prismaService.store.delete({
             where: {
                 id: id,
             },
@@ -108,7 +108,7 @@ export class StoreService {
      * @returns [StoreModel]
      */
     async addStoreCategory(storeId: string, storeCategoryId: string): Promise<StoreModel> {
-        return await this.prismaService.store.update({
+        return this.prismaService.store.update({
             where: {
                 id: storeId,
             },
@@ -129,7 +129,7 @@ export class StoreService {
      * @returns [StoreModel]
      */
     async removeStoreCategory(storeId: string, storeCategoryId: string): Promise<StoreModel> {
-        return await this.prismaService.store.update({
+        return this.prismaService.store.update({
             where: {
                 id: storeId,
             },
@@ -150,7 +150,7 @@ export class StoreService {
      * @returns [StoreModel]
      */
     async addProductToStore(storeId: string, productId: string): Promise<StoreModel> {
-        return await this.prismaService.store.update({
+        return this.prismaService.store.update({
             where: {
                 id: storeId,
             },
@@ -171,7 +171,7 @@ export class StoreService {
      * @returns [StoreModel]
      */
     async removeProductFromStore(storeId: string, productId: string): Promise<StoreModel> {
-        return await this.prismaService.store.update({
+        return this.prismaService.store.update({
             where: {
                 id: storeId,
             },
@@ -195,7 +195,7 @@ export class StoreService {
         // make the name lower case
         createStoreCategoryDto.name = createStoreCategoryDto.name.toLowerCase();
         // if the category already exists, throw an error
-        const _category = await this.prismaService.storeCategory.findUnique({
+        const _category:StoreCategoryModel = await this.prismaService.storeCategory.findUnique({
             where: {
                 name: createStoreCategoryDto.name,
             },
@@ -203,13 +203,13 @@ export class StoreService {
         if (_category) {
             throw new HttpException('Store Category already Exist', HttpStatus.CONFLICT);
         }
-        return await this.prismaService.storeCategory.create({
+        return this.prismaService.storeCategory.create({
             data: createStoreCategoryDto,
         });
     }
 
     async getStoreCategory(id: string): Promise<StoreCategoryModel> {
-        return await this.prismaService.storeCategory.findUnique({
+        return this.prismaService.storeCategory.findUnique({
             where: {
                 id: id,
             },
@@ -217,11 +217,11 @@ export class StoreService {
     }
 
     async getStoreCategories(): Promise<Array<StoreCategoryModel>> {
-        return await this.prismaService.storeCategory.findMany();
+        return this.prismaService.storeCategory.findMany();
     }
 
     async updateStoreCategory(id: string, updateStoreCategoryDto: UpdateStoreCategoryDto): Promise<StoreCategoryModel> {
-        return await this.prismaService.storeCategory.update({
+        return this.prismaService.storeCategory.update({
             where: {
                 id: id,
             },
@@ -230,7 +230,7 @@ export class StoreService {
     }
 
     async deleteStoreCategory(id: string): Promise<string> {
-        const _category = await this.prismaService.storeCategory.delete({
+        const _category:StoreCategoryModel = await this.prismaService.storeCategory.delete({
             where: {
                 id: id,
             },

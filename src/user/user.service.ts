@@ -4,7 +4,7 @@ import { PrismaService } from '@shared/prisma/prisma.service';
 import { CreateCartDto, CreateUserDto } from './dto/create.dto';
 import { Response } from 'express';
 import { LoginUserDto } from './dto/login.dto';
-import { comparePassword, generateSalt, getDefaultPropertyValue, hashPassword } from '@shared';
+import {comparePassword, generateSalt, getDefaultPropertyValue, hashPassword, PayLoad} from '@shared';
 import { User as UserModel } from '@prisma/client';
 import { UpdateCartDto, UpdateUserDto } from './dto/update.dto';
 
@@ -18,7 +18,7 @@ export class UserService {
     /**
      * Create or Register a new user and set the access_token in the cookie
      * take the user details through the CreateUserDto
-     * @param userDto [CreateUserDto]
+     * @param userDto
      * @param response access token to be set in the cookie
      * @returns access_token
      */
@@ -26,7 +26,7 @@ export class UserService {
         // make the email lowercase
         userDto.email = userDto.email.toLowerCase();
         // check if user already exist
-        const _userExist = await this.prismaService.user.findUnique({
+        const _userExist: UserModel = await this.prismaService.user.findUnique({
             where: {
                 email: userDto.email
             }
@@ -38,7 +38,7 @@ export class UserService {
         if (userDto.password.length < 8) {
             throw new HttpException('Password must be at least 8 characters', HttpStatus.BAD_REQUEST);
         }
-        const salt = await generateSalt();
+        const salt: string = await generateSalt();
 
         // add the salt to the dto
         userDto.salt = salt;
@@ -48,11 +48,11 @@ export class UserService {
             salt,
         );
 
-        const _user = await this.prismaService.user.create({
+        const _user: UserModel = await this.prismaService.user.create({
             data: userDto
         });
-        const payload = { sub: _user.id, username: _user.email, role: _user.role };
-        const token = this.jwtService.sign(payload);
+        const payload: PayLoad = { sub: _user.id, username: _user.email, role: _user.role };
+        const token:string = this.jwtService.sign(payload);
         response.cookie('access_token', token, {
             httpOnly: true,
         });
@@ -62,14 +62,14 @@ export class UserService {
     /**
      * Login a user and set the access_token in the cookie
      * take the user email and password through the LoginUserDto
-     * @param user [LoginUserDto] - user to login credentials
+     * @param user
      * @param response access_token to be set in the cookie
      * @returns access_token
      */
     async loginUser(user: LoginUserDto, response: Response): Promise<string> {
         // make the email lowercase
         user.email = user.email.toLowerCase();
-        const _user = await this.prismaService.user.findUnique({
+        const _user:UserModel = await this.prismaService.user.findUnique({
             where: {
                 email: user.email
             }
@@ -79,12 +79,12 @@ export class UserService {
             throw new HttpException(`No account found for user with email ${user.email}`, HttpStatus.NOT_FOUND);
         }
 
-        const isPasswordValid = await comparePassword(user.password, _user.password);
+        const isPasswordValid:boolean = await comparePassword(user.password, _user.password);
         if (!isPasswordValid) {
             throw new HttpException('Invalid email or passowrd', HttpStatus.BAD_REQUEST);
         }
-        const payload = { sub: _user.id, username: _user.email, role: _user.role };
-        const token = this.jwtService.sign(payload);
+        const payload: PayLoad = { sub: _user.id, username: _user.email, role: _user.role };
+        const token:string = this.jwtService.sign(payload);
         response.cookie('access_token', token, {
             httpOnly: true,
         });
@@ -97,7 +97,7 @@ export class UserService {
      * @returns [User] object without password and salt
      */
     async validateUser(id: string): Promise<UserModel | null> {
-        const _user = await this.prismaService.user.findUnique({
+        const _user:UserModel = await this.prismaService.user.findUnique({
             where: { id: id },
         });
         // console.log(_user)
@@ -113,7 +113,7 @@ export class UserService {
      * @returns [User] object without password and salt
      */
     async profile(id: string): Promise<UserModel> {
-        const _user = await this.prismaService.user.findUnique({
+        const _user: UserModel = await this.prismaService.user.findUnique({
             where: { id: id },
             include: {
                 cart: true,
@@ -131,7 +131,7 @@ export class UserService {
      * @returns [User] object without password and salt
      */
     async getUserById(id: string): Promise<UserModel> {
-        const _user = await this.prismaService.user.findUnique({
+        const _user: UserModel = await this.prismaService.user.findUnique({
             where: { id: id },
             include: {
                 cart: true,
@@ -148,22 +148,22 @@ export class UserService {
      * @returns [User[]] array of users without password and salt
      */
     async getUsers(): Promise<UserModel[]> {
-        const _users = await this.prismaService.user.findMany({
+        const _users: Array<UserModel> = await this.prismaService.user.findMany({
             include: {
                 cart: true,
             }
         });
-        return _users.map(user => this.exclude(user, ['password', 'salt']));
+        return _users.map((user:UserModel) => this.exclude(user, ['password', 'salt']));
     }
 
     /**
      * Update a user profile
      * @param id user id to update profile
-     * @param user [UpdateUserDto]
+     * @param user
      * @returns [User] object without password and salt
      */
     async updateUser(id: string, user: UpdateUserDto): Promise<UserModel> {
-        const _user = await this.prismaService.user.findUnique({
+        const _user: UserModel = await this.prismaService.user.findUnique({
             where: { id: id },
         });
         if (!_user) {
@@ -173,7 +173,7 @@ export class UserService {
         if (user.email && user.email !== _user.email) {
             throw new HttpException('Email cannot be changed', HttpStatus.BAD_REQUEST);
         }
-        const _updatedUser = await this.prismaService.user.update({
+        const _updatedUser:UserModel = await this.prismaService.user.update({
             where: { id: id },
             data: user
         });
@@ -183,11 +183,11 @@ export class UserService {
     /**
      * Add a cart item(s) to a user
      * @param id user id to get cart
-     * @param cart [CreateCartDto]
+     * @param cart
      * @returns [User] object without password and salt
      */
     async addCart(id: string, cart: CreateCartDto): Promise<UserModel> {
-        const _user = await this.prismaService.user.findUnique({
+        const _user: UserModel = await this.prismaService.user.findUnique({
             where: { id: id },
             include: {
                 cart: true,
@@ -196,7 +196,7 @@ export class UserService {
         if (!_user) {
             throw new HttpException('User not found', HttpStatus.NOT_FOUND);
         }
-        const _userUpdate = await this.prismaService.user.update({
+        const _userUpdate: UserModel = await this.prismaService.user.update({
             where: { id: id },
             data: {
                 cart: {
@@ -214,7 +214,7 @@ export class UserService {
      * Update a cart item(s) to a user
      * @param userId user id to get cart
      * @param cartId card id to update
-     * @param cart [UpdateCartDto] cart item(s) to update
+     * @param cart
      * @returns [User] object without password and salt
      */
     async updateCart(
@@ -222,7 +222,7 @@ export class UserService {
         cartId: string,
         cart: UpdateCartDto
     ): Promise<UserModel> {
-        const _user = await this.prismaService.user.findUnique({
+        const _user:UserModel = await this.prismaService.user.findUnique({
             where: { id: userId },
             include: {
                 cart: true,
@@ -231,7 +231,7 @@ export class UserService {
         if (!_user) {
             throw new HttpException('User not found', HttpStatus.NOT_FOUND);
         }
-        const _userUpdate = await this.prismaService.user.update({
+        const _userUpdate:UserModel = await this.prismaService.user.update({
             where: { id: userId },
             data: {
                 cart: {
@@ -252,7 +252,7 @@ export class UserService {
      * @returns [User] object without password and salt
      */
     async deleteCart(userId: string, cartId: string): Promise<UserModel> {
-        const _user = await this.prismaService.user.findUnique({
+        const _user:UserModel = await this.prismaService.user.findUnique({
             where: { id: userId },
             include: {
                 cart: true,
@@ -261,7 +261,7 @@ export class UserService {
         if (!_user) {
             throw new HttpException('User not found', HttpStatus.NOT_FOUND);
         }
-        const _userUpdate = await this.prismaService.user.update({
+        const _userUpdate:UserModel = await this.prismaService.user.update({
             where: { id: userId },
             data: {
                 cart: {
@@ -281,7 +281,7 @@ export class UserService {
      * @returns [User] object without password and salt
      */
     async deleteUser(id: string): Promise<string> {
-        const _user = await this.prismaService.user.delete({
+        const _user:UserModel = await this.prismaService.user.delete({
             where: { id: id },
         });
         if (!_user) {
@@ -297,10 +297,10 @@ export class UserService {
      * @param keys
      * @private
      */
-    private exclude<CustomerModel, Key extends keyof CustomerModel>(
-        user: CustomerModel,
-        keys: Key[],
-    ): CustomerModel {
+    private exclude<UserModel, Key extends keyof UserModel>(
+        user: UserModel,
+        keys: Array<Key>,
+    ): UserModel {
         for (const key of keys) {
             // Populate the value with a default value of its type
             user[key] = getDefaultPropertyValue(user[key]);

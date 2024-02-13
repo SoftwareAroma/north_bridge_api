@@ -13,10 +13,10 @@ export class PaymentService {
 
     /**
      * Create payment (initialize)
-     * @param dataDto [CreatePaymentDto]
      * @returns Object from paystack
+     * @param dataDto
      */
-    async createPayment(dataDto: CreatePaymentDto) {
+    async createPayment(dataDto: CreatePaymentDto): Promise<any> {
         const { amount, currency, email } = dataDto;
 
         // if either amount, currency or email is null
@@ -61,7 +61,7 @@ export class PaymentService {
      * @param reference The transaction reference
      * @returns response from paystack [Object]
      */
-    async verifyPayment(reference: string) {
+    async verifyPayment(reference: string): Promise<any> {
         // if reference is null
         if (!reference) {
             throw new HttpException("Reference is required", HttpStatus.BAD_REQUEST);
@@ -90,7 +90,7 @@ export class PaymentService {
      * Get all transactions
      * @returns response from paystack [Object]
      */
-    async transactions() {
+    async transactions(): Promise<any> {
         const headers = {
             Authorization: `Bearer ${PAY_STACK_API_KEY}`,
             'Content-Type': 'application/json'
@@ -104,7 +104,7 @@ export class PaymentService {
                 catchError((error: AxiosError) => {
                     // this.logger.error(error.response.data);
                     console.log(error.response.data);
-                    throw new HttpException(error.response.data ?? "An Error Occured", HttpStatus.BAD_REQUEST);
+                    throw new HttpException(error.response.data ?? "An Error Occurred", HttpStatus.BAD_REQUEST);
                 }),
             ),
         );
