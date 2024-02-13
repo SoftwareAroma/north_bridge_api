@@ -25,7 +25,7 @@ export class CreateStoreDto {
     @IsArray()
     @IsOptional()
     @ApiProperty()
-    storeCategories: string[];
+    categories: string[];
 
     @IsString()
     @IsNotEmpty()

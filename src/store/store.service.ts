@@ -20,7 +20,7 @@ export class StoreService {
             data: {
                 ...createStoreDto,
                 categories: {
-                    connect: createStoreDto.storeCategories?.map((storeCategoryId) => {
+                    connect: createStoreDto.categories?.map((storeCategoryId) => {
                         return {
                             id: storeCategoryId,
                         };
@@ -77,7 +77,7 @@ export class StoreService {
             data: {
                 ...updateStoreDto,
                 categories: {
-                    connect: updateStoreDto.storeCategories?.map((storeCategoryId) => {
+                    connect: updateStoreDto.categories?.map((storeCategoryId) => {
                         return {
                             id: storeCategoryId,
                         };

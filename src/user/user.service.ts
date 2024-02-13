@@ -274,6 +274,7 @@ export class UserService {
         return this.exclude(_userUpdate, ['password', 'salt']);
     }
 
+
     /**
      * Delete a user by id
      * @param id user id to delete

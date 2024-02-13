@@ -174,7 +174,7 @@ export class UserController {
 
     @CheckPolicies(new UpdateUserPolicyHandler())
     @UseGuards(JwtAuthGuard, PoliciesGuard)
-    @Patch('remove-cart/:id')
+    @Patch('remove-cart/:id/:cartId')
     @ApiResponse({
         status: HttpStatus.OK,
         description: 'Cart removed successfully',
@@ -182,7 +182,7 @@ export class UserController {
     })
     async removeCart(
         @Param('id') id: string,
-        @Body() cartId: string
+        @Param('cartId') cartId: string,
     ): Promise<CustomApiResponse<{ user: UserModel }>> {
         const _user = await this.userService.deleteCart(id, cartId);
         return new CustomApiResponse<{ user: UserModel }>({
