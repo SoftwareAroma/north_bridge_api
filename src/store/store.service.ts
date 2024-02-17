@@ -20,7 +20,7 @@ export class StoreService {
             data: {
                 ...createStoreDto,
                 categories: {
-                    connect: createStoreDto.categories?.map((storeCategoryId:string): {id:string} => {
+                    connect: createStoreDto.categories?.map((storeCategoryId: string): { id: string } => {
                         return {
                             id: storeCategoryId,
                         };
@@ -77,7 +77,7 @@ export class StoreService {
             data: {
                 ...updateStoreDto,
                 categories: {
-                    connect: updateStoreDto.categories?.map((storeCategoryId:string): {id:string} => {
+                    connect: updateStoreDto.categories?.map((storeCategoryId: string): { id: string } => {
                         return {
                             id: storeCategoryId,
                         };
@@ -93,7 +93,7 @@ export class StoreService {
      * @returns 
      */
     async deleteStore(id: string): Promise<string> {
-        const resp:StoreModel = await this.prismaService.store.delete({
+        const resp: StoreModel = await this.prismaService.store.delete({
             where: {
                 id: id,
             },
@@ -195,7 +195,7 @@ export class StoreService {
         // make the name lower case
         createStoreCategoryDto.name = createStoreCategoryDto.name.toLowerCase();
         // if the category already exists, throw an error
-        const _category:StoreCategoryModel = await this.prismaService.storeCategory.findUnique({
+        const _category: StoreCategoryModel = await this.prismaService.storeCategory.findUnique({
             where: {
                 name: createStoreCategoryDto.name,
             },
@@ -230,7 +230,7 @@ export class StoreService {
     }
 
     async deleteStoreCategory(id: string): Promise<string> {
-        const _category:StoreCategoryModel = await this.prismaService.storeCategory.delete({
+        const _category: StoreCategoryModel = await this.prismaService.storeCategory.delete({
             where: {
                 id: id,
             },
