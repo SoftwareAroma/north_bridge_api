@@ -13,7 +13,7 @@ import { PrismaService } from '@shared/prisma/prisma.service';
  * ############### BOOTSTRAP THE APP ####################
  * ######################################################
  * */
-async function bootstrap() : Promise<void> {
+async function bootstrap(): Promise<void> {
   const app: NestExpressApplication = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: ['error', 'warn', 'debug', 'verbose'], // log only in these cases
   });
@@ -21,12 +21,12 @@ async function bootstrap() : Promise<void> {
   const configService: ConfigService<any, any> = app.get(ConfigService);
   app.get(PrismaService);
   app.enableShutdownHooks();
-  // string from environment file
+  // string from environment file // can make changes
   const origin: string = configService.get<string>('FRONTEND_URL');
   // api version
   const apiVersion: string = configService.get<string>('API_VERSION');
-  const appName : string = 'NORTH BRIDGE';
-  const swaggerPath : string = 'swagger';
+  const appName: string = 'NORTH BRIDGE';
+  const swaggerPath: string = 'swagger';
   app.setGlobalPrefix('api');
 
   // enable CORS
@@ -95,4 +95,4 @@ async function bootstrap() : Promise<void> {
       console.log('There was an error starting server. ', err);
     });
 }
-bootstrap().then((): void => {console.log()});
+bootstrap().then((): void => { console.log() });
