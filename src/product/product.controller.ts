@@ -24,7 +24,8 @@ import {
     CreateProductCategoryPolicyHandler,
     CreateProductPolicyHandler,
     DeleteProductPolicyHandler,
-    UpdateProductCategoryPolicyHandler
+    UpdateProductCategoryPolicyHandler,
+    UpdateProductPolicyHandler
 } from '@shared/casl/handler/policy.handler';
 import {
     ProductCategoriesResponse,
@@ -35,7 +36,6 @@ import {
 import { StringResponse } from '@app/response/response.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { multerFileFilter, multerLimits, multerStorage } from './multer/multier.service';
-import { Express } from 'express';
 import { UpdateProductDto } from './dto/update.dto';
 
 @ApiTags('Products Endpoints')
@@ -67,7 +67,7 @@ export class ProductController {
         @UploadedFiles() files: Array<Express.Multer.File>,
     ): Promise<CustomApiResponse<{ product: ProductModel }>> {
         // console.log(data);
-        const product = await this.productService.createProduct(data, files);
+        const product: ProductModel = await this.productService.createProduct(data, files);
         return new CustomApiResponse<{ product: ProductModel }>({
             data: { product: product },
             message: 'Product created successfully',
@@ -83,14 +83,13 @@ export class ProductController {
         type: ProductsResponse,
     })
     async getProducts(): Promise<CustomApiResponse<{ products: Array<ProductModel> }>> {
-        const products = await this.productService.getProducts();
+        const products: Array<ProductModel> = await this.productService.getProducts();
         return new CustomApiResponse<{ products: Array<ProductModel> }>({
             data: { products: products },
             message: 'Products retrieved successfully',
             success: true,
         });
     }
-
 
     @Get('product/:id')
     @ApiResponse({
@@ -101,7 +100,7 @@ export class ProductController {
     async getProduct(
         @Param('id') id: string,
     ): Promise<CustomApiResponse<{ product: ProductModel }>> {
-        const product = await this.productService.getProduct(id);
+        const product: ProductModel = await this.productService.getProduct(id);
         return new CustomApiResponse<{ product: ProductModel }>({
             data: { product: product },
             message: 'Product retrieved successfully',
@@ -121,7 +120,7 @@ export class ProductController {
         @Param('id') id: string,
         @Body() data: UpdateProductDto,
     ): Promise<CustomApiResponse<{ product: ProductModel }>> {
-        const product = await this.productService.updateProduct(id, data);
+        const product: ProductModel = await this.productService.updateProduct(id, data);
         return new CustomApiResponse<{ product: ProductModel }>({
             data: { product: product },
             message: 'Product updated successfully',
@@ -140,13 +139,67 @@ export class ProductController {
     async deleteProduct(
         @Param('id') id: string,
     ): Promise<CustomApiResponse<{ product: string }>> {
-        const product = await this.productService.deleteProduct(id);
+        const product: string = await this.productService.deleteProduct(id);
         return new CustomApiResponse<{ product: string }>({
             data: { product: product },
             message: 'Product deleted successfully',
             success: true,
         });
     }
+
+
+    /**
+     * Add a category to a product
+     * @param id id of product to add category to
+     * @param categoryId category id to add
+     * @returns CustomApiResponse<{ product: ProductModel }>()
+     */
+    @CheckPolicies(new UpdateProductPolicyHandler())
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
+    @Patch('add-category/:id')
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Store updated successfully',
+        type: ProductResponse,
+    })
+    async addCategory(
+        @Param('id') id: string,
+        @Body() categoryId: string,
+    ): Promise<CustomApiResponse<{ product: ProductModel }>> {
+        const _product: ProductModel = await this.productService.addProductCategory(id, categoryId);
+        return new CustomApiResponse<{ product: ProductModel }>({
+            data: { product: _product },
+            message: 'Product updated successfully',
+            success: true,
+        });
+    }
+
+    /**
+     * 
+     * @param id id of product to remove category from
+     * @param categoryId category id to remove
+     * @returns CustomApiResponse<{ product: ProductModel }>()
+     */
+    @CheckPolicies(new UpdateProductPolicyHandler())
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
+    @Patch('remove-category/:id')
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Store updated successfully',
+        type: ProductResponse,
+    })
+    async removeCategory(
+        @Param('id') id: string,
+        @Body() categoryId: string,
+    ): Promise<CustomApiResponse<{ product: ProductModel }>> {
+        const _product: ProductModel = await this.productService.removeProductCategory(id, categoryId);
+        return new CustomApiResponse<{ product: ProductModel }>({
+            data: { product: _product },
+            message: 'Product updated successfully',
+            success: true,
+        });
+    }
+
 
     /// ---------------------------------------- ///
     /// --------------- CATEGORY --------------- ///
@@ -163,7 +216,7 @@ export class ProductController {
     async createProductCategory(
         @Body() data: CreateProductCategoryDto,
     ): Promise<CustomApiResponse<{ productCategory: ProductCategoryModel }>> {
-        const product = await this.productService.createProductCategory(data);
+        const product: ProductCategoryModel = await this.productService.createProductCategory(data);
         return new CustomApiResponse<{ productCategory: ProductCategoryModel }>({
             data: { productCategory: product },
             message: 'Product created successfully',
@@ -178,7 +231,7 @@ export class ProductController {
         type: ProductCategoriesResponse,
     })
     async getProductCategories(): Promise<CustomApiResponse<{ productCategories: Array<ProductCategoryModel> }>> {
-        const productCategories = await this.productService.getProductCategories();
+        const productCategories: Array<ProductCategoryModel> = await this.productService.getProductCategories();
         return new CustomApiResponse<{ productCategories: Array<ProductCategoryModel> }>({
             data: { productCategories: productCategories },
             message: 'Product categories retrieved successfully',
@@ -195,7 +248,7 @@ export class ProductController {
     async getProductCategory(
         @Param('id') id: string,
     ): Promise<CustomApiResponse<{ productCategory: ProductCategoryModel }>> {
-        const productCategory = await this.productService.getProductCategory(id);
+        const productCategory: ProductCategoryModel = await this.productService.getProductCategory(id);
         return new CustomApiResponse<{ productCategory: ProductCategoryModel }>({
             data: { productCategory: productCategory },
             message: 'Product category retrieved successfully',
@@ -215,7 +268,7 @@ export class ProductController {
         @Param('id') id: string,
         @Body() data: CreateProductCategoryDto,
     ): Promise<CustomApiResponse<{ productCategory: ProductCategoryModel }>> {
-        const productCategory = await this.productService.updateProductCategory(id, data);
+        const productCategory: ProductCategoryModel = await this.productService.updateProductCategory(id, data);
         return new CustomApiResponse<{ productCategory: ProductCategoryModel }>({
             data: { productCategory: productCategory },
             message: 'Product category updated successfully',
@@ -234,7 +287,7 @@ export class ProductController {
     async deleteProductCategory(
         @Param('id') id: string,
     ): Promise<CustomApiResponse<{ productCategory: string }>> {
-        const productCategory = await this.productService.deleteProductCategory(id);
+        const productCategory: string = await this.productService.deleteProductCategory(id);
         return new CustomApiResponse<{ productCategory: string }>({
             data: { productCategory: productCategory },
             message: 'Product category deleted successfully',

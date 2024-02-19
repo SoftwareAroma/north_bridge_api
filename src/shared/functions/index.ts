@@ -1,10 +1,14 @@
 import bcrypt from 'bcrypt';
-// import multer from 'multer';
+// import multer, {diskStorage} from 'multer';
 // import * as fs from 'fs';
 // import * as path from 'path';
 // import * as process from 'process';
 
-// hash password with bcrypt
+/**
+ * Hash password
+ * @param password
+ * @param salt
+ */
 export const hashPassword = async (
   password: string,
   salt: string,
@@ -12,7 +16,11 @@ export const hashPassword = async (
   return await bcrypt.hash(password, salt);
 };
 
-// compare password with bcrypt
+/**
+ * Compare password with hashed password
+ * @param password
+ * @param hashedPassword
+ */
 export const comparePassword = async (
   password: string,
   hashedPassword: string,
@@ -20,12 +28,17 @@ export const comparePassword = async (
   return await bcrypt.compare(password, hashedPassword);
 };
 
-// generate salt
+/**
+ * Generate salt for hashing password
+ */
 export const generateSalt = async (): Promise<string> => {
   return await bcrypt.genSalt(10);
 };
 
-// Helper function to get the default value for a property type
+/**
+ * Get default value for a property
+ * @param value
+ */
 export const getDefaultPropertyValue = <T>(value: T): T => {
   if (typeof value === 'boolean') {
     return false as T;
@@ -38,21 +51,20 @@ export const getDefaultPropertyValue = <T>(value: T): T => {
   } else if (typeof value === 'object' && value !== null) {
     return {} as T;
   }
-  // Add more cases for other types as needed
   return value;
 }
 
-// export const storage = (destination:string) => multer.diskStorage({
-//     destination: function (req, file, cb) {
-//         const folderPath = path.join(`${process.cwd()}/`, `${destination}`);
+// export const multerStorage = (destination:string): multer.StorageEngine => diskStorage({
+//     destination: function (_req:any, _file:Express.Multer.File, cb):void {
+//         const folderPath:string = path.join(`${process.cwd()}/`, `${destination}`);
 //         if(!fs.existsSync(folderPath)){
 //             fs.mkdirSync(folderPath, {recursive: true});
 //         }
 //         cb(null, `${destination}`)
 //     },
-//     filename: function (req, file, cb) {
-//         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-//         const ext = file.mimetype.split('/')[1]
+//     filename: function (_req:any, file:Express.Multer.File, cb):void {
+//         const uniqueSuffix:string = Date.now() + '-' + Math.round(Math.random() * 1E9)
+//         const ext:string = file.mimetype.split('/')[1]
 //         console.log(file.fieldname + '-' + uniqueSuffix + '.' + ext)
 //         cb(null, file.fieldname + '-' + uniqueSuffix + '.' + ext)
 //     }

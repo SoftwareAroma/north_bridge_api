@@ -49,8 +49,8 @@ export class StoreController {
 
     /**
      * Create a new store
-     * @param data [CreateStoreDto]
      * @returns CustomApiResponse<{ store: StoreModel }>()
+     * @param data
      */
     @CheckPolicies(new CreateStorePolicyHandler())
     @UseGuards(JwtAuthGuard, PoliciesGuard)
@@ -63,7 +63,7 @@ export class StoreController {
     async createStore(
         @Body() data: CreateStoreDto,
     ): Promise<CustomApiResponse<{ store: StoreModel }>> {
-        const _store = await this.storeService.createStore(data);
+        const _store:StoreModel = await this.storeService.createStore(data);
         return new CustomApiResponse<{ store: StoreModel }>({
             data: { store: _store },
             message: 'Store created successfully',
@@ -81,8 +81,8 @@ export class StoreController {
         description: 'Stores fetched successfully',
         type: StoresResponse,
     })
-    async getStores(): Promise<CustomApiResponse<{ stores: StoreModel[] }>> {
-        const _stores = await this.storeService.getStores();
+    async getStores(): Promise<CustomApiResponse<{ stores: Array<StoreModel>}>> {
+        const _stores :Array<StoreModel> = await this.storeService.getStores();
         return new CustomApiResponse<{ stores: StoreModel[] }>({
             data: { stores: _stores },
             message: 'Stores fetched successfully',
@@ -102,7 +102,7 @@ export class StoreController {
         type: StoreResponse,
     })
     async getStore(@Param('id') id: string): Promise<CustomApiResponse<{ store: StoreModel }>> {
-        const _store = await this.storeService.getStore(id);
+        const _store:StoreModel = await this.storeService.getStore(id);
         return new CustomApiResponse<{ store: StoreModel }>({
             data: { store: _store },
             message: 'Store fetched successfully',
@@ -113,7 +113,7 @@ export class StoreController {
     /**
      * Update a store
      * @param id id of store to update
-     * @param data [UpdateStoreDto]
+     * @param data
      * @returns CustomApiResponse<{ store: StoreModel }>()
      */
     @CheckPolicies(new UpdateStorePolicyHandler())
@@ -168,8 +168,8 @@ export class StoreController {
 
     /**
      * Create a new store category
-     * @param data [CreateStoreCategoryDto]
      * @returns CustomApiResponse<{ storeCategory: StoreCategoryModel }>()
+     * @param data
      */
     @CheckPolicies(new CreateStoreCategoryPolicyHandler())
     @UseGuards(JwtAuthGuard, PoliciesGuard)
@@ -182,7 +182,7 @@ export class StoreController {
     async createStoreCategory(
         @Body() data: CreateStoreCategoryDto,
     ): Promise<CustomApiResponse<{ storeCategory: StoreCategoryModel }>> {
-        const _storeCategory = await this.storeService.createStoreCategory(data);
+        const _storeCategory:StoreCategoryModel = await this.storeService.createStoreCategory(data);
         return new CustomApiResponse<{ storeCategory: StoreCategoryModel }>({
             data: { storeCategory: _storeCategory },
             message: 'Store category created successfully',
@@ -203,7 +203,7 @@ export class StoreController {
         type: StoreCategoriesResponse,
     })
     async getStoreCategories(): Promise<CustomApiResponse<{ storeCategories: StoreCategoryModel[] }>> {
-        const _storeCategories = await this.storeService.getStoreCategories();
+        const _storeCategories: Array<StoreCategoryModel> = await this.storeService.getStoreCategories();
         return new CustomApiResponse<{ storeCategories: StoreCategoryModel[] }>({
             data: { storeCategories: _storeCategories },
             message: 'Store categories fetched successfully',
@@ -236,7 +236,7 @@ export class StoreController {
     /**
      * Update a store category
      * @param id id of store category to update
-     * @param data [UpdateStoreCategoryDto]
+     * @param data
      * @returns CustomApiResponse<{ storeCategory: StoreCategoryModel }>()
      */
     @CheckPolicies(new UpdateStoreCategoryPolicyHandler())
@@ -251,7 +251,7 @@ export class StoreController {
         @Param('id') id: string,
         @Body() data: UpdateStoreCategoryDto,
     ): Promise<CustomApiResponse<{ storeCategory: StoreCategoryModel }>> {
-        const _storeCategory = await this.storeService.updateStoreCategory(id, data);
+        const _storeCategory: StoreCategoryModel = await this.storeService.updateStoreCategory(id, data);
         return new CustomApiResponse<{ storeCategory: StoreCategoryModel }>({
             data: { storeCategory: _storeCategory },
             message: 'Store category updated successfully',
@@ -273,7 +273,7 @@ export class StoreController {
         type: StringResponse,
     })
     async deleteStoreCategory(@Param('id') id: string): Promise<CustomApiResponse<{ storeCategory: string }>> {
-        const _storeCategory = await this.storeService.deleteStoreCategory(id);
+        const _storeCategory:string = await this.storeService.deleteStoreCategory(id);
         return new CustomApiResponse<{ storeCategory: string }>({
             data: { storeCategory: _storeCategory },
             message: 'Store category deleted successfully',
@@ -299,7 +299,7 @@ export class StoreController {
         @Param('id') id: string,
         @Body() categoryId: string,
     ): Promise<CustomApiResponse<{ store: StoreModel }>> {
-        const _store = await this.storeService.addStoreCategory(id, categoryId);
+        const _store: StoreModel = await this.storeService.addStoreCategory(id, categoryId);
         return new CustomApiResponse<{ store: StoreModel }>({
             data: { store: _store },
             message: 'Store updated successfully',
@@ -325,7 +325,7 @@ export class StoreController {
         @Param('id') id: string,
         @Body() categoryId: string,
     ): Promise<CustomApiResponse<{ store: StoreModel }>> {
-        const _store = await this.storeService.removeStoreCategory(id, categoryId);
+        const _store:StoreModel = await this.storeService.removeStoreCategory(id, categoryId);
         return new CustomApiResponse<{ store: StoreModel }>({
             data: { store: _store },
             message: 'Store updated successfully',
@@ -356,7 +356,7 @@ export class StoreController {
         @Param('id') id: string,
         @Body() productId: string,
     ): Promise<CustomApiResponse<{ store: StoreModel }>> {
-        const _store = await this.storeService.addProductToStore(id, productId);
+        const _store:StoreModel = await this.storeService.addProductToStore(id, productId);
         return new CustomApiResponse<{ store: StoreModel }>({
             data: { store: _store },
             message: 'Store updated successfully',
@@ -382,7 +382,7 @@ export class StoreController {
         @Param('id') id: string,
         @Body() productId: string,
     ): Promise<CustomApiResponse<{ store: StoreModel }>> {
-        const _store = await this.storeService.removeProductFromStore(id, productId);
+        const _store:StoreModel = await this.storeService.removeProductFromStore(id, productId);
         return new CustomApiResponse<{ store: StoreModel }>({
             data: { store: _store },
             message: 'Store updated successfully',

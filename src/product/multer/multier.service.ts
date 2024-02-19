@@ -1,15 +1,17 @@
 import { Injectable } from "@nestjs/common";
 import { MulterModuleOptions, MulterOptionsFactory } from "@nestjs/platform-express";
 import { UPLOADS_DIR } from "@shared/environment";
-import { diskStorage } from "multer";
+import multer, { diskStorage } from "multer";
 import path, { extname } from "path";
+import process from "process";
+import fs from "fs";
 
-export const multerLimits = {
+export const multerLimits: {fileSize: number} = {
     fileSize: 1024 * 1024 * 10, // 10MB
 };
 
-export const multerFileFilter = (req, file, cb) => {
-    const allowedMimes = ['image/jpeg', 'image/png', 'image/jpg', 'image/JPEG', 'image/PNG', 'image/JPG'];
+export const multerFileFilter = (_req: any, file: { mimetype: string; }, cb: (arg0: Error, arg1: boolean) => void): void => {
+    const allowedMimes: Array<string> = ['image/jpeg', 'image/png', 'image/jpg', 'image/JPEG', 'image/PNG', 'image/JPG'];
     if (allowedMimes.includes(file.mimetype)) {
         cb(null, true);
     } else {
@@ -17,13 +19,20 @@ export const multerFileFilter = (req, file, cb) => {
     }
 };
 
-export const multerStorage = diskStorage({
+export const multerStorage: multer.StorageEngine = diskStorage({
     // upload to uploads folder outside the src folder
-    destination: path.join(__dirname, UPLOADS_DIR),
-    filename: (req, file, cb) => {
-        const name = file.originalname.split('.')[0];
-        const extension = extname(file.originalname);
-        const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('');
+    // destination: path.join(__dirname, UPLOADS_DIR),
+    destination: function (_req:any, _file:Express.Multer.File, cb):void {
+        const folderPath:string = path.join(`${process.cwd()}/`, `${UPLOADS_DIR}/products`);
+        if(!fs.existsSync(folderPath)){
+            fs.mkdirSync(folderPath, {recursive: true});
+        }
+        cb(null, `${UPLOADS_DIR}/products`);
+    },
+    filename: (_req:any, file:Express.Multer.File, cb): void => {
+        const name:string = file.originalname.split('.')[0];
+        const extension:string = extname(file.originalname);
+        const randomName:string = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('');
         cb(null, `${name}-${randomName}${extension}`);
     },
 });

@@ -158,6 +158,49 @@ export class ProductService {
     }
 
     /**
+     * Add a product category to a product
+     * @param productId product id to add category to
+     * @param productCategoryId the category id to add
+     * @returns [ProductModel]
+     */
+    async addProductCategory(productId: string, productCategoryId: string): Promise<ProductModel> {
+        return this.prismaService.product.update({
+            where: {
+                id: productId,
+            },
+            data: {
+                categories: {
+                    connect: {
+                        id: productCategoryId,
+                    },
+                },
+            },
+        });
+    }
+
+    /**
+     * Remove a product category from a product
+     * @param productId product id to remove category from
+     * @param storeCategoryId store category id to remove
+     * @returns [ProductModel]
+     */
+    async removeProductCategory(productId: string, productCategoryId: string): Promise<ProductModel> {
+        return this.prismaService.product.update({
+            where: {
+                id: productId,
+            },
+            data: {
+                categories: {
+                    disconnect: {
+                        id: productCategoryId,
+                    },
+                },
+            },
+        });
+    }
+
+
+    /**
      * Create a product category
      * @param data [CreateStoreCategoryDto]
      * @returns ProductCategoryModel object

@@ -34,6 +34,7 @@ import {
     ReadVendorPolicyHandler,
     UpdateVendorPolicyHandler
 } from '@shared/casl/handler/policy.handler';
+import { Response } from 'express';
 
 @ApiTags('Vendor Endpoints')
 @Controller({ path: 'vendor', version: '1' })
@@ -44,7 +45,7 @@ export class VendorController {
 
     /**
      * Register a new vendor
-     * @param data [CreateVendorDto]
+     * @param data
      * @param response Response
      * @returns access_token
      */
@@ -56,9 +57,9 @@ export class VendorController {
     })
     async registerVendor(
         @Body() data: CreateVendorDto,
-        @Res({ passthrough: true }) response,
+        @Res({ passthrough: true }) response: Response
     ): Promise<CustomApiResponse<{ access_token: string }>> {
-        const _token = await this.vendorService.createVendor(data, response);
+        const _token: string = await this.vendorService.createVendor(data, response);
         return new CustomApiResponse<{ access_token: string }>({
             data: { access_token: _token },
             message: 'Vendor registered successfully',
@@ -68,7 +69,7 @@ export class VendorController {
 
     /**
      * Login a vendor
-     * @param data [LoginVendorDto]
+     * @param data
      * @param response Response
      * @returns access_token
      */
@@ -80,9 +81,9 @@ export class VendorController {
     })
     async loginVendor(
         @Body() data: LoginVendorDto,
-        @Res({ passthrough: true }) response,
+        @Res({ passthrough: true }) response: Response
     ): Promise<CustomApiResponse<{ access_token: string }>> {
-        const _token = await this.vendorService.loginVendor(data, response);
+        const _token: string = await this.vendorService.loginVendor(data, response);
         return new CustomApiResponse<{ access_token: string }>({
             data: { access_token: _token },
             message: 'Vendor logged in successfully',
@@ -100,8 +101,8 @@ export class VendorController {
         description: 'Vendors fetched successfully',
         type: VendorsResponse,
     })
-    async getAllVendors(): Promise<CustomApiResponse<{ vendors: VendorModel[] }>> {
-        const _vendors = await this.vendorService.getVendors();
+    async getAllVendors(): Promise<CustomApiResponse<{ vendors: Array<VendorModel> }>> {
+        const _vendors: Array<VendorModel>  = await this.vendorService.getVendors();
         return new CustomApiResponse<{ vendors: VendorModel[] }>({
             data: { vendors: _vendors },
             message: 'Vendors fetched successfully',
@@ -123,10 +124,10 @@ export class VendorController {
         type: VendorResponse,
     })
     async getVendorProfile(
-        @Req() request,
+        @Req() request: any,
     ): Promise<CustomApiResponse<{ vendor: VendorModel }>> {
         const { userId } = request.user;
-        const vendor = await this.vendorService.profile(userId);
+        const vendor: VendorModel  = await this.vendorService.profile(userId);
         return new CustomApiResponse<{ vendor: VendorModel }>({
             data: { vendor: vendor },
             message: 'Vendor profile retrieved successfully',
@@ -148,7 +149,7 @@ export class VendorController {
     async getVendor(
         @Param('id') id: string,
     ): Promise<CustomApiResponse<{ vendor: VendorModel }>> {
-        const vendor = await this.vendorService.getVendor(id);
+        const vendor: VendorModel  = await this.vendorService.getVendor(id);
         return new CustomApiResponse<{ vendor: VendorModel }>({
             data: { vendor: vendor },
             message: 'Vendor profile retrieved successfully',
@@ -174,7 +175,7 @@ export class VendorController {
         @Param('id') id: string,
         @Body() data: UpdateVendorDto,
     ): Promise<CustomApiResponse<{ vendor: VendorModel }>> {
-        const vendor = await this.vendorService.updateVendor(id, data);
+        const vendor: VendorModel = await this.vendorService.updateVendor(id, data);
         return new CustomApiResponse<{ vendor: VendorModel }>({
             data: { vendor: vendor },
             message: 'Vendor profile updated successfully',
@@ -194,7 +195,7 @@ export class VendorController {
         type: BooleanResponse,
     })
     async logoutVendor(
-        @Res({ passthrough: true }) response,
+        @Res({ passthrough: true }) response: Response,
     ): Promise<CustomApiResponse<boolean>> {
         response.cookie('access_token', '', { maxAge: 1 });
         return new CustomApiResponse<boolean>({
@@ -207,6 +208,7 @@ export class VendorController {
     /**
      * Delete a vendor
      * @param id Vendor id
+     * @param response
      * @returns Vendor id
      */
     @CheckPolicies(new DeleteVendorPolicyHandler())
@@ -219,8 +221,10 @@ export class VendorController {
     })
     async deleteVendor(
         @Param('id') id: string,
+        @Res({ passthrough: true }) response: Response,
     ): Promise<CustomApiResponse<{ user: string }>> {
-        const _user = await this.vendorService.deleteVendor(id);
+        const _user: string = await this.vendorService.deleteVendor(id);
+        response.cookie('access_token', '', { maxAge: 1 });
         return new CustomApiResponse<{ user: string }>({
             data: { user: _user },
             message: 'Vendor deleted successfully',

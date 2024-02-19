@@ -13,26 +13,26 @@ import { PrismaService } from '@shared/prisma/prisma.service';
  * ############### BOOTSTRAP THE APP ####################
  * ######################################################
  * */
-async function bootstrap() {
+async function bootstrap(): Promise<void> {
   const app: NestExpressApplication = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: ['error', 'warn', 'debug', 'verbose'], // log only in these cases
   });
   // app config service
-  const configService = app.get(ConfigService);
+  const configService: ConfigService<any, any> = app.get(ConfigService);
   app.get(PrismaService);
   app.enableShutdownHooks();
-  // string from environment file
+  // string from environment file // can make changes
   const origin: string = configService.get<string>('FRONTEND_URL');
   // api version
   const apiVersion: string = configService.get<string>('API_VERSION');
-  const appName = 'NORTH BRIDDGE';
-  const swaggerPath = 'swagger';
-
+  const appName: string = 'NORTH BRIDGE';
+  const swaggerPath: string = 'swagger';
   app.setGlobalPrefix('api');
 
   // enable CORS
   app.enableCors({
     origin: origin,
+    credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     preflightContinue: false,
   });
@@ -81,7 +81,7 @@ async function bootstrap() {
   SwaggerModule.setup(`${swaggerPath}`, app, document);
 
   // get the port from the config file
-  const port = configService.get<number>('PORT');
+  const port: number = configService.get<number>('PORT');
   await app
     .listen(port)
     .then((): void => {
@@ -95,4 +95,4 @@ async function bootstrap() {
       console.log('There was an error starting server. ', err);
     });
 }
-bootstrap();
+bootstrap().then((): void => { console.log() });
