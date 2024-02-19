@@ -56,4 +56,9 @@ export class CreateProductCategoryDto {
     @IsString()
     @ApiProperty({ required: true })
     name: string;
+
+    @IsString()
+    @IsOptional()
+    @ApiProperty({ required: false })
+    description: string;
 }
