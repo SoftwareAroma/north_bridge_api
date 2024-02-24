@@ -65,15 +65,15 @@ export class ProductController {
     async createProduct(
         @Body() data: CreateProductDto,
         @UploadedFiles() files: Array<Express.Multer.File>,
-    ): Promise<CustomApiResponse<{ product: ProductModel }> | any> {
-        console.log(data);
-        console.log(files);
-        // const product: ProductModel = await this.productService.createProduct(data, files);
-        // return new CustomApiResponse<{ product: ProductModel }>({
-        //     data: { product: product },
-        //     message: 'Product created successfully',
-        //     success: true,
-        // });
+    ): Promise<CustomApiResponse<{ product: ProductModel }>> {
+        // console.log(data);
+        // console.log(files);
+        const product: ProductModel = await this.productService.createProduct(data, files);
+        return new CustomApiResponse<{ product: ProductModel }>({
+            data: { product: product },
+            message: 'Product created successfully',
+            success: true,
+        });
     }
 
     @Get('products')

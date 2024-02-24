@@ -85,7 +85,6 @@ export class AdminService {
             if (!_admin) {
                 throw new HttpException(`No account found for admin with email ${admin.email}`, HttpStatus.NOT_FOUND);
             }
-
             const isPasswordValid: boolean = await comparePassword(admin.password, _admin.password);
             if (!isPasswordValid) {
                 throw new HttpException('Invalid email or password', HttpStatus.BAD_REQUEST);

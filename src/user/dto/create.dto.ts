@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Cart, Role } from "@prisma/client";
-import { IsBoolean, IsEmail, IsNotEmpty, IsNumber, IsOptional, IsPhoneNumber, IsString, IsStrongPassword } from "class-validator";
+import { IsBoolean, IsEmail, IsNotEmpty, IsNumber, IsOptional, IsString, IsStrongPassword } from "class-validator";
 
 export class CreateUserDto {
     @IsEmail()
@@ -9,7 +9,15 @@ export class CreateUserDto {
 
     @IsString()
     @IsNotEmpty()
-    @IsStrongPassword()
+    @IsStrongPassword({
+        minLength: 8,
+        minLowercase: 1,
+        minUppercase: 1,
+        minNumbers: 1,
+        minSymbols: 1,
+    }, {
+        message: 'password is too weak, it must contain at least 8 characters, 1 lowercase, 1 uppercase, 1 number and 1 symbol or special character.'
+    })
     @ApiProperty({ required: true })
     password: string;
 
@@ -33,7 +41,7 @@ export class CreateUserDto {
     @ApiProperty({ required: false })
     otherName: string;
 
-    @IsPhoneNumber()
+    @IsString()
     @IsNotEmpty()
     @ApiProperty({ required: true })
     phone: string;

@@ -20,7 +20,9 @@ export class ProductService {
      */
     async createProduct(data: CreateProductDto, images?: Array<Express.Multer.File>): Promise<ProductModel> {
 
-        try {// if files is not empty, upload the file buffer to postgres
+        try {
+            // if files is not empty, upload the file buffer to postgres
+            let _imageList: Array<string> = [];
             if (images && images.length > 0) {
                 for (let i = 0; i < images.length; i++) {
                     const file = images[i];
@@ -32,7 +34,8 @@ export class ProductService {
                             path: file.path,
                         },
                     });
-                    data.images.push(_file.id);
+                    // add the id to the _imageList
+                    _imageList.push(_file.id);
                 }
             }
 
@@ -40,7 +43,7 @@ export class ProductService {
                 data: {
                     ...data,
                     images: {
-                        connect: data.images?.map((image) => ({ id: image })),
+                        connect: _imageList?.map((image) => ({ id: image })),
                     },
                     categories: {
                         connect: data.categories?.map((category) => ({ id: category })),
