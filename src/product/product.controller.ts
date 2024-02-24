@@ -35,8 +35,9 @@ import {
 } from './dto/response.dto';
 import { StringResponse } from '@app/response/response.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { multerFileFilter, multerLimits, multerStorage } from './multer/multier.service';
+import { multerLimits, multerStorage } from './multer/multier.service';
 import { UpdateProductDto } from './dto/update.dto';
+import Express from 'express';
 
 @ApiTags('Products Endpoints')
 @Controller({ path: 'product', version: '1' })
@@ -53,7 +54,6 @@ export class ProductController {
     @UseGuards(JwtAuthGuard, PoliciesGuard)
     @Post('create')
     @UseInterceptors(FilesInterceptor('files', 4, {
-        fileFilter: multerFileFilter,
         limits: multerLimits,
         storage: multerStorage,
     }))
@@ -65,16 +65,16 @@ export class ProductController {
     async createProduct(
         @Body() data: CreateProductDto,
         @UploadedFiles() files: Array<Express.Multer.File>,
-    ): Promise<CustomApiResponse<{ product: ProductModel }>> {
-        // console.log(data);
-        const product: ProductModel = await this.productService.createProduct(data, files);
-        return new CustomApiResponse<{ product: ProductModel }>({
-            data: { product: product },
-            message: 'Product created successfully',
-            success: true,
-        });
+    ): Promise<CustomApiResponse<{ product: ProductModel }> | any> {
+        console.log(data);
+        console.log(files);
+        // const product: ProductModel = await this.productService.createProduct(data, files);
+        // return new CustomApiResponse<{ product: ProductModel }>({
+        //     data: { product: product },
+        //     message: 'Product created successfully',
+        //     success: true,
+        // });
     }
-
 
     @Get('products')
     @ApiResponse({

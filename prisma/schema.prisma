@@ -100,8 +100,8 @@ model Product {
   name        String
   description String
   price       Json
-  quantity    Int
-  rating      Float
+  quantity    String
+  rating      String
   images      File[]
   status      ProductStatus     @default(ACTIVE)
   storeId     String
@@ -115,12 +115,13 @@ model Product {
 
 // product category
 model ProductCategory {
-  id        String   @id @unique @default(cuid())
-  name      String   @unique
-  productId String?
-  product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @unique @default(cuid())
+  name        String   @unique
+  description String?
+  productId   String?
+  product     Product? @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 // cart of products for a user

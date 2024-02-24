@@ -17,6 +17,7 @@ async function bootstrap(): Promise<void> {
   const app: NestExpressApplication = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: ['error', 'warn', 'debug', 'verbose'], // log only in these cases
   });
+
   // app config service
   const configService: ConfigService<any, any> = app.get(ConfigService);
   app.get(PrismaService);

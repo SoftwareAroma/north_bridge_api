@@ -40,11 +40,13 @@ export class CreateStoreCategoryDto {
     name: string;
 
     @IsString()
-    @ApiProperty()
+    @IsOptional()
+    @ApiProperty({ required: false })
     description: string;
 
     @IsString()
-    @ApiProperty()
+    @IsOptional()
+    @ApiProperty({ required: false })
     storeId: string;
 
 }

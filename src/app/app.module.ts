@@ -1,24 +1,24 @@
-import {Module} from '@nestjs/common';
-import {AppController} from './app.controller';
-import {AppService} from './app.service';
-import {ProductModule} from '@product/product.module';
-import {StoreModule} from '@store/store.module';
-import {UserModule} from '@user/user.module';
-import {PrismaModule} from '@shared/prisma/prisma.module';
-import {ConfigModule} from '@nestjs/config';
+import { Module } from '@nestjs/common';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { ProductModule } from '@product/product.module';
+import { StoreModule } from '@store/store.module';
+import { UserModule } from '@user/user.module';
+import { PrismaModule } from '@shared/prisma/prisma.module';
+import { ConfigModule } from '@nestjs/config';
 import {
-  JwtStrategy,
-  configuration,
-  jwtConstants,
-  HttpExceptionFilter,
-  PrismaClientExceptionFilter
+    JwtStrategy,
+    configuration,
+    jwtConstants,
+    HttpExceptionFilter,
+    PrismaClientExceptionFilter
 } from '@shared';
 import Joi from 'joi';
-import {VendorModule} from '@vendor/vendor.module';
-import {AdminModule} from '@admin/admin.module';
-import {PassportModule} from '@nestjs/passport';
-import {JwtModule} from '@nestjs/jwt';
-import {PaymentModule} from '@payment/payment.module';
+import { VendorModule } from '@vendor/vendor.module';
+import { AdminModule } from '@admin/admin.module';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
+import { PaymentModule } from '@payment/payment.module';
 
 @Module({
     imports: [
@@ -32,10 +32,10 @@ import {PaymentModule} from '@payment/payment.module';
         // prisma for database query and connection
         PrismaModule,
 
-        PassportModule.register({defaultStrategy: 'jwt'}),
+        PassportModule.register({ defaultStrategy: 'jwt' }),
         JwtModule.register({
             secret: jwtConstants.secret,
-            signOptions: {expiresIn: jwtConstants.expiresIn},
+            signOptions: { expiresIn: jwtConstants.expiresIn },
         }),
 
 
@@ -68,14 +68,14 @@ import {PaymentModule} from '@payment/payment.module';
     providers: [
         AppService,
         JwtStrategy,
-        {
-            provide: 'APP_FILTER',
-            useClass: HttpExceptionFilter,
-        },
-        {
-            provide: 'PRISMA_FILTER',
-            useClass: PrismaClientExceptionFilter,
-        }
+        // {
+        //     provide: 'APP_FILTER',
+        //     useClass: HttpExceptionFilter,
+        // },
+        // {
+        //     provide: 'PRISMA_FILTER',
+        //     useClass: PrismaClientExceptionFilter,
+        // }
     ],
 
 })

@@ -16,18 +16,22 @@ export class StoreService {
      * @param createStoreDto
      */
     async createStore(createStoreDto: CreateStoreDto): Promise<StoreModel> {
-        return this.prismaService.store.create({
-            data: {
-                ...createStoreDto,
-                categories: {
-                    connect: createStoreDto.categories?.map((storeCategoryId: string): { id: string } => {
-                        return {
-                            id: storeCategoryId,
-                        };
-                    }),
+        try {
+            return this.prismaService.store.create({
+                data: {
+                    ...createStoreDto,
+                    categories: {
+                        connect: createStoreDto.categories?.map((storeCategoryId: string): { id: string } => {
+                            return {
+                                id: storeCategoryId,
+                            };
+                        }),
+                    },
                 },
-            },
-        });
+            });
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -36,18 +40,22 @@ export class StoreService {
      * @returns [Store] object
      */
     async getStore(id: string): Promise<StoreModel> {
-        if (!id) {
-            throw new Error('Store id is required');
+        try {
+            if (!id) {
+                throw new Error('Store id is required');
+            }
+            return this.prismaService.store.findUnique({
+                where: {
+                    id: id,
+                },
+                include: {
+                    products: true,
+                    categories: true,
+                },
+            });
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return this.prismaService.store.findUnique({
-            where: {
-                id: id,
-            },
-            include: {
-                products: true,
-                categories: true,
-            },
-        });
     }
 
     /**
@@ -55,12 +63,16 @@ export class StoreService {
      * @returns [Store] objects
      */
     async getStores(): Promise<Array<StoreModel>> {
-        return this.prismaService.store.findMany({
-            include: {
-                products: true,
-                categories: true,
-            },
-        });
+        try {
+            return this.prismaService.store.findMany({
+                include: {
+                    products: true,
+                    categories: true,
+                },
+            });
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -70,21 +82,25 @@ export class StoreService {
      * @returns [Store] object
      */
     async updateStore(id: string, updateStoreDto: UpdateStoreDto): Promise<StoreModel> {
-        return this.prismaService.store.update({
-            where: {
-                id: id,
-            },
-            data: {
-                ...updateStoreDto,
-                categories: {
-                    connect: updateStoreDto.categories?.map((storeCategoryId: string): { id: string } => {
-                        return {
-                            id: storeCategoryId,
-                        };
-                    }),
+        try {
+            return this.prismaService.store.update({
+                where: {
+                    id: id,
                 },
-            },
-        });
+                data: {
+                    ...updateStoreDto,
+                    categories: {
+                        connect: updateStoreDto.categories?.map((storeCategoryId: string): { id: string } => {
+                            return {
+                                id: storeCategoryId,
+                            };
+                        }),
+                    },
+                },
+            });
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -93,12 +109,16 @@ export class StoreService {
      * @returns 
      */
     async deleteStore(id: string): Promise<string> {
-        const resp: StoreModel = await this.prismaService.store.delete({
-            where: {
-                id: id,
-            },
-        });
-        return resp.id;
+        try {
+            const resp: StoreModel = await this.prismaService.store.delete({
+                where: {
+                    id: id,
+                },
+            });
+            return resp.id;
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -108,18 +128,22 @@ export class StoreService {
      * @returns [StoreModel]
      */
     async addStoreCategory(storeId: string, storeCategoryId: string): Promise<StoreModel> {
-        return this.prismaService.store.update({
-            where: {
-                id: storeId,
-            },
-            data: {
-                categories: {
-                    connect: {
-                        id: storeCategoryId,
+        try {
+            return this.prismaService.store.update({
+                where: {
+                    id: storeId,
+                },
+                data: {
+                    categories: {
+                        connect: {
+                            id: storeCategoryId,
+                        },
                     },
                 },
-            },
-        });
+            });
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -129,18 +153,22 @@ export class StoreService {
      * @returns [StoreModel]
      */
     async removeStoreCategory(storeId: string, storeCategoryId: string): Promise<StoreModel> {
-        return this.prismaService.store.update({
-            where: {
-                id: storeId,
-            },
-            data: {
-                categories: {
-                    disconnect: {
-                        id: storeCategoryId,
+        try {
+            return this.prismaService.store.update({
+                where: {
+                    id: storeId,
+                },
+                data: {
+                    categories: {
+                        disconnect: {
+                            id: storeCategoryId,
+                        },
                     },
                 },
-            },
-        });
+            });
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -150,18 +178,22 @@ export class StoreService {
      * @returns [StoreModel]
      */
     async addProductToStore(storeId: string, productId: string): Promise<StoreModel> {
-        return this.prismaService.store.update({
-            where: {
-                id: storeId,
-            },
-            data: {
-                products: {
-                    connect: {
-                        id: productId,
+        try {
+            return this.prismaService.store.update({
+                where: {
+                    id: storeId,
+                },
+                data: {
+                    products: {
+                        connect: {
+                            id: productId,
+                        },
                     },
                 },
-            },
-        });
+            });
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -171,18 +203,22 @@ export class StoreService {
      * @returns [StoreModel]
      */
     async removeProductFromStore(storeId: string, productId: string): Promise<StoreModel> {
-        return this.prismaService.store.update({
-            where: {
-                id: storeId,
-            },
-            data: {
-                products: {
-                    disconnect: {
-                        id: productId,
+        try {
+            return this.prismaService.store.update({
+                where: {
+                    id: storeId,
+                },
+                data: {
+                    products: {
+                        disconnect: {
+                            id: productId,
+                        },
                     },
                 },
-            },
-        });
+            });
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 
@@ -192,49 +228,68 @@ export class StoreService {
     ///-----------------------------------------------------
 
     async createStoreCategory(createStoreCategoryDto: CreateStoreCategoryDto): Promise<StoreCategoryModel> {
-        // make the name lower case
-        createStoreCategoryDto.name = createStoreCategoryDto.name.toLowerCase();
-        // if the category already exists, throw an error
-        const _category: StoreCategoryModel = await this.prismaService.storeCategory.findUnique({
-            where: {
-                name: createStoreCategoryDto.name,
-            },
-        });
-        if (_category) {
-            throw new HttpException('Store Category already Exist', HttpStatus.CONFLICT);
+        try {// make the name lower case
+            createStoreCategoryDto.name = createStoreCategoryDto.name.toLowerCase();
+            // if the category already exists, throw an error
+            const _category: StoreCategoryModel = await this.prismaService.storeCategory.findUnique({
+                where: {
+                    name: createStoreCategoryDto.name,
+                },
+            });
+            if (_category) {
+                throw new HttpException('Store Category already Exist', HttpStatus.CONFLICT);
+            }
+            return this.prismaService.storeCategory.create({
+                data: createStoreCategoryDto,
+            });
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return this.prismaService.storeCategory.create({
-            data: createStoreCategoryDto,
-        });
     }
 
     async getStoreCategory(id: string): Promise<StoreCategoryModel> {
-        return this.prismaService.storeCategory.findUnique({
-            where: {
-                id: id,
-            },
-        });
+        try {
+            return this.prismaService.storeCategory.findUnique({
+                where: {
+                    id: id,
+                },
+            });
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     async getStoreCategories(): Promise<Array<StoreCategoryModel>> {
-        return this.prismaService.storeCategory.findMany();
+        try {
+            return this.prismaService.storeCategory.findMany();
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     async updateStoreCategory(id: string, updateStoreCategoryDto: UpdateStoreCategoryDto): Promise<StoreCategoryModel> {
-        return this.prismaService.storeCategory.update({
-            where: {
-                id: id,
-            },
-            data: updateStoreCategoryDto,
-        });
+        try {
+            return this.prismaService.storeCategory.update({
+                where: {
+                    id: id,
+                },
+                data: updateStoreCategoryDto,
+            });
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     async deleteStoreCategory(id: string): Promise<string> {
-        const _category: StoreCategoryModel = await this.prismaService.storeCategory.delete({
-            where: {
-                id: id,
-            },
-        });
-        return _category.id;
+        try {
+            const _category: StoreCategoryModel = await this.prismaService.storeCategory.delete({
+                where: {
+                    id: id,
+                },
+            });
+            return _category.id;
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

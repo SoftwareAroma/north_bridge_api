@@ -5,6 +5,7 @@ import { ProductCategory as ProductCategoryModel, Product as ProductModel } from
 import { Express } from 'express';
 import { UpdateProductDto } from './dto/update.dto';
 import { UpdateStoreCategoryDto } from '@store/dto/update.dto';
+import { UPLOADS_DIR } from '@shared/environment';
 
 @Injectable()
 export class ProductService {
@@ -19,38 +20,41 @@ export class ProductService {
      */
     async createProduct(data: CreateProductDto, images?: Array<Express.Multer.File>): Promise<ProductModel> {
 
-        // if files is not empty, upload the file buffer to postgres
-        if (images && images.length > 0) {
-            for (let i = 0; i < images.length; i++) {
-                const file = images[i];
-                const _file = await this.prismaService.file.create({
-                    data: {
-                        name: file.filename,
-                        size: file.size,
-                        type: file.mimetype,
-                        path: file.path,
-                    },
-                });
-                data.images.push(_file.id);
+        try {// if files is not empty, upload the file buffer to postgres
+            if (images && images.length > 0) {
+                for (let i = 0; i < images.length; i++) {
+                    const file = images[i];
+                    const _file = await this.prismaService.file.create({
+                        data: {
+                            name: file.filename,
+                            size: file.size,
+                            type: file.mimetype,
+                            path: file.path,
+                        },
+                    });
+                    data.images.push(_file.id);
+                }
             }
-        }
 
-        return await this.prismaService.product.create({
-            data: {
-                ...data,
-                images: {
-                    connect: data.images?.map((image) => ({ id: image })),
+            return await this.prismaService.product.create({
+                data: {
+                    ...data,
+                    images: {
+                        connect: data.images?.map((image) => ({ id: image })),
+                    },
+                    categories: {
+                        connect: data.categories?.map((category) => ({ id: category })),
+                    },
                 },
-                categories: {
-                    connect: data.categories?.map((category) => ({ id: category })),
+                include: {
+                    categories: true,
+                    store: true,
+                    images: true,
                 },
-            },
-            include: {
-                categories: true,
-                store: true,
-                images: true,
-            },
-        });
+            });
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -58,24 +62,28 @@ export class ProductService {
      * @returns Array<ProductModel>
      */
     async getProducts(): Promise<Array<ProductModel>> {
-        const _products = await this.prismaService.product.findMany({
-            include: {
-                categories: true,
-                store: true,
-                images: true,
-            },
-        });
+        try {
+            const _products = await this.prismaService.product.findMany({
+                include: {
+                    categories: true,
+                    store: true,
+                    images: true,
+                },
+            });
 
-        // get the full file path for each image from the uploads folder
-        // const products = _products.map((product) => {
-        //     product.images = product.images.map((image) => {
-        //         image.path = `${process.env.APP_URL}/uploads/${image.path}`;
-        //         return image;
-        //     });
-        //     return product;
-        // });
+            // get the full file path for each image from the uploads folder
+            const _ = _products.map((product) => {
+                product.images = product.images.map((image) => {
+                    image.path = `${UPLOADS_DIR}/products/${image.path}`;
+                    return image;
+                });
+                return product;
+            });
 
-        return _products;
+            return _products;
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -84,16 +92,20 @@ export class ProductService {
      * @returns [ProductModel]
      */
     async getProduct(id: string): Promise<ProductModel> {
-        return await this.prismaService.product.findUnique({
-            where: {
-                id: id,
-            },
-            include: {
-                categories: true,
-                store: true,
-                images: true,
-            },
-        });
+        try {
+            return await this.prismaService.product.findUnique({
+                where: {
+                    id: id,
+                },
+                include: {
+                    categories: true,
+                    store: true,
+                    images: true,
+                },
+            });
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -107,40 +119,43 @@ export class ProductService {
         images?: Array<Express.Multer.File>
     ): Promise<ProductModel> {
 
-        // if files is not empty, upload the file buffer to postgres
-        if (images && images.length > 0) {
-            for (let i = 0; i < images.length; i++) {
-                const file = images[i];
-                const _file = await this.prismaService.file.create({
-                    data: {
-                        name: file.filename,
-                        size: file.size,
-                        type: file.mimetype,
-                        path: file.path,
-                    },
-                });
-                data.images.push(_file.id);
+        try {// if files is not empty, upload the file buffer to postgres
+            if (images && images.length > 0) {
+                for (let i = 0; i < images.length; i++) {
+                    const file = images[i];
+                    const _file = await this.prismaService.file.create({
+                        data: {
+                            name: file.filename,
+                            size: file.size,
+                            type: file.mimetype,
+                            path: file.path,
+                        },
+                    });
+                    data.images.push(_file.id);
+                }
             }
+            return await this.prismaService.product.update({
+                where: {
+                    id: id,
+                },
+                data: {
+                    ...data,
+                    images: {
+                        connect: data.images?.map((image) => ({ id: image })),
+                    },
+                    categories: {
+                        connect: data.categories?.map((category) => ({ id: category })),
+                    },
+                },
+                include: {
+                    categories: true,
+                    store: true,
+                    images: true,
+                },
+            });
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return await this.prismaService.product.update({
-            where: {
-                id: id,
-            },
-            data: {
-                ...data,
-                images: {
-                    connect: data.images?.map((image) => ({ id: image })),
-                },
-                categories: {
-                    connect: data.categories?.map((category) => ({ id: category })),
-                },
-            },
-            include: {
-                categories: true,
-                store: true,
-                images: true,
-            },
-        });
     }
 
     /**
@@ -149,12 +164,16 @@ export class ProductService {
      * @returns [string]
      */
     async deleteProduct(id: string): Promise<string> {
-        const _product = await this.prismaService.product.delete({
-            where: {
-                id: id,
-            },
-        });
-        return _product.id;
+        try {
+            const _product = await this.prismaService.product.delete({
+                where: {
+                    id: id,
+                },
+            });
+            return _product.id;
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -164,18 +183,22 @@ export class ProductService {
      * @returns [ProductModel]
      */
     async addProductCategory(productId: string, productCategoryId: string): Promise<ProductModel> {
-        return this.prismaService.product.update({
-            where: {
-                id: productId,
-            },
-            data: {
-                categories: {
-                    connect: {
-                        id: productCategoryId,
+        try {
+            return this.prismaService.product.update({
+                where: {
+                    id: productId,
+                },
+                data: {
+                    categories: {
+                        connect: {
+                            id: productCategoryId,
+                        },
                     },
                 },
-            },
-        });
+            });
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -185,18 +208,22 @@ export class ProductService {
      * @returns [ProductModel]
      */
     async removeProductCategory(productId: string, productCategoryId: string): Promise<ProductModel> {
-        return this.prismaService.product.update({
-            where: {
-                id: productId,
-            },
-            data: {
-                categories: {
-                    disconnect: {
-                        id: productCategoryId,
+        try {
+            return this.prismaService.product.update({
+                where: {
+                    id: productId,
+                },
+                data: {
+                    categories: {
+                        disconnect: {
+                            id: productCategoryId,
+                        },
                     },
                 },
-            },
-        });
+            });
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 
@@ -206,20 +233,23 @@ export class ProductService {
      * @returns ProductCategoryModel object
      */
     async createProductCategory(data: CreateProductCategoryDto): Promise<ProductCategoryModel> {
-        // make the name lower case
-        data.name = data.name.toLowerCase();
-        // check if the category already exists
-        const _category = await this.prismaService.productCategory.findUnique({
-            where: {
-                name: data.name,
-            },
-        });
-        if (_category) {
-            throw new HttpException('Product Category already Exist', HttpStatus.CONFLICT);
+        try {// make the name lower case
+            data.name = data.name.toLowerCase();
+            // check if the category already exists
+            const _category = await this.prismaService.productCategory.findUnique({
+                where: {
+                    name: data.name,
+                },
+            });
+            if (_category) {
+                throw new HttpException('Product Category already Exist', HttpStatus.CONFLICT);
+            }
+            return await this.prismaService.productCategory.create({
+                data: data,
+            });
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return await this.prismaService.productCategory.create({
-            data: data,
-        });
     }
 
     /**
@@ -227,7 +257,11 @@ export class ProductService {
      * @returns Array<ProductCategory>
      */
     async getProductCategories(): Promise<Array<ProductCategoryModel>> {
-        return await this.prismaService.productCategory.findMany();
+        try {
+            return await this.prismaService.productCategory.findMany();
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -236,11 +270,15 @@ export class ProductService {
      * @returns ProductCategoryModel object
      */
     async getProductCategory(id: string): Promise<ProductCategoryModel> {
-        return await this.prismaService.productCategory.findUnique({
-            where: {
-                id: id,
-            },
-        });
+        try {
+            return await this.prismaService.productCategory.findUnique({
+                where: {
+                    id: id,
+                },
+            });
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -250,12 +288,16 @@ export class ProductService {
      * @returns ProductCategoryModel object
      */
     async updateProductCategory(id: string, data: UpdateStoreCategoryDto): Promise<ProductCategoryModel> {
-        return await this.prismaService.productCategory.update({
-            where: {
-                id: id,
-            },
-            data: data,
-        });
+        try {
+            return await this.prismaService.productCategory.update({
+                where: {
+                    id: id,
+                },
+                data: data,
+            });
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -264,11 +306,15 @@ export class ProductService {
      * @returns [string]
      */
     async deleteProductCategory(id: string): Promise<string> {
-        const _category = await this.prismaService.productCategory.delete({
-            where: {
-                id: id,
-            },
-        });
-        return _category.id;
+        try {
+            const _category = await this.prismaService.productCategory.delete({
+                where: {
+                    id: id,
+                },
+            });
+            return _category.id;
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
