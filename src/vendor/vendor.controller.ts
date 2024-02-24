@@ -102,7 +102,7 @@ export class VendorController {
         type: VendorsResponse,
     })
     async getAllVendors(): Promise<CustomApiResponse<{ vendors: Array<VendorModel> }>> {
-        const _vendors: Array<VendorModel>  = await this.vendorService.getVendors();
+        const _vendors: Array<VendorModel> = await this.vendorService.getVendors();
         return new CustomApiResponse<{ vendors: VendorModel[] }>({
             data: { vendors: _vendors },
             message: 'Vendors fetched successfully',
@@ -127,7 +127,7 @@ export class VendorController {
         @Req() request: any,
     ): Promise<CustomApiResponse<{ vendor: VendorModel }>> {
         const { userId } = request.user;
-        const vendor: VendorModel  = await this.vendorService.profile(userId);
+        const vendor: VendorModel = await this.vendorService.profile(userId);
         return new CustomApiResponse<{ vendor: VendorModel }>({
             data: { vendor: vendor },
             message: 'Vendor profile retrieved successfully',
@@ -149,7 +149,7 @@ export class VendorController {
     async getVendor(
         @Param('id') id: string,
     ): Promise<CustomApiResponse<{ vendor: VendorModel }>> {
-        const vendor: VendorModel  = await this.vendorService.getVendor(id);
+        const vendor: VendorModel = await this.vendorService.getVendor(id);
         return new CustomApiResponse<{ vendor: VendorModel }>({
             data: { vendor: vendor },
             message: 'Vendor profile retrieved successfully',

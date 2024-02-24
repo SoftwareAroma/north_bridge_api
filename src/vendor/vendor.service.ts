@@ -1,12 +1,12 @@
-import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
-import {PrismaService} from '@shared/prisma/prisma.service';
-import {CreateVendorDto} from './dto/create.dto';
-import {Response} from 'express';
-import {comparePassword, generateSalt, getDefaultPropertyValue, hashPassword, PayLoad} from '@shared';
-import {JwtService} from '@nestjs/jwt';
-import {LoginVendorDto} from './dto/login.dto';
-import {UpdateVendorDto} from './dto/update.dto';
-import {Vendor as VendorModel} from '@prisma/client';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { PrismaService } from '@shared/prisma/prisma.service';
+import { CreateVendorDto } from './dto/create.dto';
+import { Response } from 'express';
+import { comparePassword, generateSalt, getDefaultPropertyValue, hashPassword, PayLoad } from '@shared';
+import { JwtService } from '@nestjs/jwt';
+import { LoginVendorDto } from './dto/login.dto';
+import { UpdateVendorDto } from './dto/update.dto';
+import { Vendor as VendorModel } from '@prisma/client';
 
 @Injectable()
 export class VendorService {
@@ -23,38 +23,41 @@ export class VendorService {
      * @param response
      */
     async createVendor(data: CreateVendorDto, response: Response): Promise<string> {
-        // check if vendor already exist with email
-        const vendorExist: VendorModel = await this.prismaService.vendor.findUnique({
-            where: {
-                email: data.email,
-            },
-        });
-        if (vendorExist) {
-            throw new HttpException('Email Already Exist', HttpStatus.CONFLICT);
+        try {// check if vendor already exist with email
+            const vendorExist: VendorModel = await this.prismaService.vendor.findUnique({
+                where: {
+                    email: data.email,
+                },
+            });
+            if (vendorExist) {
+                throw new HttpException('Email Already Exist', HttpStatus.CONFLICT);
+            }
+
+            if (data.password.length < 8) {
+                throw new HttpException('Password must be at least 8 characters', HttpStatus.BAD_REQUEST);
+            }
+            const salt: string = await generateSalt();
+
+            // add the salt to the dto
+            data.salt = salt;
+
+            data.password = await hashPassword(
+                data.password,
+                salt,
+            );
+
+            const _vendor: VendorModel = await this.prismaService.vendor.create({
+                data: data,
+            });
+            const payload: PayLoad = { sub: _vendor.id, username: _vendor.email, role: _vendor.role };
+            const token: string = this.jwtService.sign(payload);
+            response.cookie('access_token', token, {
+                httpOnly: true,
+            });
+            return token;
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        if (data.password.length < 8) {
-            throw new HttpException('Password must be at least 8 characters', HttpStatus.BAD_REQUEST);
-        }
-        const salt: string = await generateSalt();
-
-        // add the salt to the dto
-        data.salt = salt;
-
-        data.password = await hashPassword(
-            data.password,
-            salt,
-        );
-
-        const _vendor: VendorModel = await this.prismaService.vendor.create({
-            data: data,
-        });
-        const payload: PayLoad = {sub: _vendor.id, username: _vendor.email, role: _vendor.role};
-        const token: string = this.jwtService.sign(payload);
-        response.cookie('access_token', token, {
-            httpOnly: true,
-        });
-        return token;
     }
 
     /**
@@ -64,26 +67,31 @@ export class VendorService {
      * @param response
      */
     async loginVendor(data: LoginVendorDto, response: Response): Promise<string> {
-        const _vendor: VendorModel = await this.prismaService.vendor.findUnique({
-            where: {
-                email: data.email,
-            },
-        });
-        // if vendor does not exist
-        if (!_vendor) {
-            throw new HttpException(`No account found for vendor with email ${_vendor.email}`, HttpStatus.NOT_FOUND);
-        }
+        // console.log(data);
+        try {
+            const _vendor: VendorModel = await this.prismaService.vendor.findUnique({
+                where: {
+                    email: data.email,
+                },
+            });
+            // if vendor does not exist
+            if (!_vendor) {
+                throw new HttpException(`No account found for vendor with email ${_vendor.email}`, HttpStatus.NOT_FOUND);
+            }
 
-        const isPasswordValid:boolean = await comparePassword(data.password, _vendor.password);
-        if (!isPasswordValid) {
-            throw new HttpException('Invalid email or password', HttpStatus.BAD_REQUEST);
+            const isPasswordValid: boolean = await comparePassword(data.password, _vendor.password);
+            if (!isPasswordValid) {
+                throw new HttpException('Invalid email or password', HttpStatus.BAD_REQUEST);
+            }
+            const payload: PayLoad = { sub: _vendor.id, username: _vendor.email, role: _vendor.role };
+            const token: string = this.jwtService.sign(payload);
+            response.cookie('access_token', token, {
+                httpOnly: true,
+            });
+            return token;
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        const payload: PayLoad = {sub: _vendor.id, username: _vendor.email, role: _vendor.role};
-        const token: string = this.jwtService.sign(payload);
-        response.cookie('access_token', token, {
-            httpOnly: true,
-        });
-        return token;
     }
 
     /**
@@ -91,20 +99,24 @@ export class VendorService {
      * @returns [Array<VendorModel>]
      */
     async getVendors(): Promise<Array<VendorModel>> {
-        const _vendors: Array<VendorModel>  = await this.prismaService.vendor.findMany({
-            include: {
-                stores: {
-                    include: {
-                        products: {
-                            include: {
-                                categories: true
+        try {
+            const _vendors: Array<VendorModel> = await this.prismaService.vendor.findMany({
+                include: {
+                    stores: {
+                        include: {
+                            products: {
+                                include: {
+                                    categories: true
+                                },
                             },
                         },
                     },
                 },
-            },
-        });
-        return _vendors.map((vendor: VendorModel ) => this.exclude(vendor, ['password', 'salt']));
+            });
+            return _vendors.map((vendor: VendorModel) => this.exclude(vendor, ['password', 'salt']));
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -113,14 +125,18 @@ export class VendorService {
      * @returns [User] object without password and salt
      */
     async validateVendor(id: string): Promise<VendorModel | null> {
-        const _user: VendorModel  = await this.prismaService.vendor.findUnique({
-            where: {id: id},
-        });
-        // console.log(_user)
-        if (!_user) {
-            return null;
+        try {
+            const _user: VendorModel = await this.prismaService.vendor.findUnique({
+                where: { id: id },
+            });
+            // console.log(_user)
+            if (!_user) {
+                return null;
+            }
+            return this.exclude(_user, ['password', 'salt']);
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return this.exclude(_user, ['password', 'salt']);
     }
 
     /**
@@ -129,23 +145,27 @@ export class VendorService {
      * @returns [VendorModel]
      */
     async profile(id: string): Promise<VendorModel> {
-        const _vendor: VendorModel  = await this.prismaService.vendor.findUnique({
-            where: {
-                id: id,
-            },
-            include: {
-                stores: {
-                    include: {
-                        products: {
-                            include: {
-                                categories: true
+        try {
+            const _vendor: VendorModel = await this.prismaService.vendor.findUnique({
+                where: {
+                    id: id,
+                },
+                include: {
+                    stores: {
+                        include: {
+                            products: {
+                                include: {
+                                    categories: true
+                                },
                             },
                         },
                     },
                 },
-            },
-        });
-        return this.exclude(_vendor, ['password', 'salt']);
+            });
+            return this.exclude(_vendor, ['password', 'salt']);
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -154,23 +174,27 @@ export class VendorService {
      * @returns [VendorModel]
      */
     async getVendor(id: string): Promise<VendorModel> {
-        const _vendor: VendorModel  = await this.prismaService.vendor.findUnique({
-            where: {
-                id: id,
-            },
-            include: {
-                stores: {
-                    include: {
-                        products: {
-                            include: {
-                                categories: true
+        try {
+            const _vendor: VendorModel = await this.prismaService.vendor.findUnique({
+                where: {
+                    id: id,
+                },
+                include: {
+                    stores: {
+                        include: {
+                            products: {
+                                include: {
+                                    categories: true
+                                },
                             },
                         },
                     },
                 },
-            },
-        });
-        return this.exclude(_vendor, ['password', 'salt']);
+            });
+            return this.exclude(_vendor, ['password', 'salt']);
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -180,26 +204,30 @@ export class VendorService {
      * @returns [VendorModel]
      */
     async updateVendor(id: string, data: UpdateVendorDto): Promise<VendorModel> {
-        const _vendor: VendorModel  = await this.prismaService.vendor.findUnique({
-            where: {
-                id: id,
-            },
-        });
-        if (!_vendor) {
-            throw new HttpException('Vendor not found', HttpStatus.NOT_FOUND);
-        }
-        // if user tries to update email
-        if (data.email && data.email !== _vendor.email) {
-            throw new HttpException('Email cannot be changed', HttpStatus.BAD_REQUEST);
-        }
+        try {
+            const _vendor: VendorModel = await this.prismaService.vendor.findUnique({
+                where: {
+                    id: id,
+                },
+            });
+            if (!_vendor) {
+                throw new HttpException('Vendor not found', HttpStatus.NOT_FOUND);
+            }
+            // if user tries to update email
+            if (data.email && data.email !== _vendor.email) {
+                throw new HttpException('Email cannot be changed', HttpStatus.BAD_REQUEST);
+            }
 
-        const _updatedVendor: VendorModel  = await this.prismaService.vendor.update({
-            where: {
-                id: id,
-            },
-            data: data,
-        });
-        return this.exclude(_updatedVendor, ['password', 'salt']);
+            const _updatedVendor: VendorModel = await this.prismaService.vendor.update({
+                where: {
+                    id: id,
+                },
+                data: data,
+            });
+            return this.exclude(_updatedVendor, ['password', 'salt']);
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -208,13 +236,17 @@ export class VendorService {
      * @returns string
      */
     async deleteVendor(id: string): Promise<string> {
-        const _vendor: VendorModel  = await this.prismaService.vendor.delete({
-            where: {
-                id: id,
-            },
-        });
+        try {
+            const _vendor: VendorModel = await this.prismaService.vendor.delete({
+                where: {
+                    id: id,
+                },
+            });
 
-        return _vendor.id;
+            return _vendor.id;
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**

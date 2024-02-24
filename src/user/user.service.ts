@@ -4,7 +4,7 @@ import { PrismaService } from '@shared/prisma/prisma.service';
 import { CreateCartDto, CreateUserDto } from './dto/create.dto';
 import { Response } from 'express';
 import { LoginUserDto } from './dto/login.dto';
-import {comparePassword, generateSalt, getDefaultPropertyValue, hashPassword, PayLoad} from '@shared';
+import { comparePassword, generateSalt, getDefaultPropertyValue, hashPassword, PayLoad } from '@shared';
 import { User as UserModel } from '@prisma/client';
 import { UpdateCartDto, UpdateUserDto } from './dto/update.dto';
 
@@ -23,40 +23,43 @@ export class UserService {
      * @returns access_token
      */
     async registerUser(userDto: CreateUserDto, response: Response): Promise<string> {
-        // make the email lowercase
-        userDto.email = userDto.email.toLowerCase();
-        // check if user already exist
-        const _userExist: UserModel = await this.prismaService.user.findUnique({
-            where: {
-                email: userDto.email
+        try {// make the email lowercase
+            userDto.email = userDto.email.toLowerCase();
+            // check if user already exist
+            const _userExist: UserModel = await this.prismaService.user.findUnique({
+                where: {
+                    email: userDto.email
+                }
+            });
+            if (_userExist) {
+                throw new HttpException('Email Already Exist', HttpStatus.CONFLICT);
             }
-        });
-        if (_userExist) {
-            throw new HttpException('Email Already Exist', HttpStatus.CONFLICT);
+
+            if (userDto.password.length < 8) {
+                throw new HttpException('Password must be at least 8 characters', HttpStatus.BAD_REQUEST);
+            }
+            const salt: string = await generateSalt();
+
+            // add the salt to the dto
+            userDto.salt = salt;
+
+            userDto.password = await hashPassword(
+                userDto.password,
+                salt,
+            );
+
+            const _user: UserModel = await this.prismaService.user.create({
+                data: userDto
+            });
+            const payload: PayLoad = { sub: _user.id, username: _user.email, role: _user.role };
+            const token: string = this.jwtService.sign(payload);
+            response.cookie('access_token', token, {
+                httpOnly: true,
+            });
+            return token;
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        if (userDto.password.length < 8) {
-            throw new HttpException('Password must be at least 8 characters', HttpStatus.BAD_REQUEST);
-        }
-        const salt: string = await generateSalt();
-
-        // add the salt to the dto
-        userDto.salt = salt;
-
-        userDto.password = await hashPassword(
-            userDto.password,
-            salt,
-        );
-
-        const _user: UserModel = await this.prismaService.user.create({
-            data: userDto
-        });
-        const payload: PayLoad = { sub: _user.id, username: _user.email, role: _user.role };
-        const token:string = this.jwtService.sign(payload);
-        response.cookie('access_token', token, {
-            httpOnly: true,
-        });
-        return token;
     }
 
     /**
@@ -67,28 +70,31 @@ export class UserService {
      * @returns access_token
      */
     async loginUser(user: LoginUserDto, response: Response): Promise<string> {
-        // make the email lowercase
-        user.email = user.email.toLowerCase();
-        const _user:UserModel = await this.prismaService.user.findUnique({
-            where: {
-                email: user.email
+        try { // make the email lowercase
+            user.email = user.email.toLowerCase();
+            const _user: UserModel = await this.prismaService.user.findUnique({
+                where: {
+                    email: user.email
+                }
+            });
+            // if user does not exist
+            if (!_user) {
+                throw new HttpException(`No account found for user with email ${user.email}`, HttpStatus.NOT_FOUND);
             }
-        });
-        // if user does not exist
-        if (!_user) {
-            throw new HttpException(`No account found for user with email ${user.email}`, HttpStatus.NOT_FOUND);
-        }
 
-        const isPasswordValid:boolean = await comparePassword(user.password, _user.password);
-        if (!isPasswordValid) {
-            throw new HttpException('Invalid email or passowrd', HttpStatus.BAD_REQUEST);
+            const isPasswordValid: boolean = await comparePassword(user.password, _user.password);
+            if (!isPasswordValid) {
+                throw new HttpException('Invalid email or passowrd', HttpStatus.BAD_REQUEST);
+            }
+            const payload: PayLoad = { sub: _user.id, username: _user.email, role: _user.role };
+            const token: string = this.jwtService.sign(payload);
+            response.cookie('access_token', token, {
+                httpOnly: true,
+            });
+            return token;
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        const payload: PayLoad = { sub: _user.id, username: _user.email, role: _user.role };
-        const token:string = this.jwtService.sign(payload);
-        response.cookie('access_token', token, {
-            httpOnly: true,
-        });
-        return token;
     }
 
     /**
@@ -97,14 +103,18 @@ export class UserService {
      * @returns [User] object without password and salt
      */
     async validateUser(id: string): Promise<UserModel | null> {
-        const _user:UserModel = await this.prismaService.user.findUnique({
-            where: { id: id },
-        });
-        // console.log(_user)
-        if (!_user) {
-            return null;
+        try {
+            const _user: UserModel = await this.prismaService.user.findUnique({
+                where: { id: id },
+            });
+            // console.log(_user)
+            if (!_user) {
+                return null;
+            }
+            return this.exclude(_user, ['password', 'salt']);
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return this.exclude(_user, ['password', 'salt']);
     }
 
     /**
@@ -113,16 +123,20 @@ export class UserService {
      * @returns [User] object without password and salt
      */
     async profile(id: string): Promise<UserModel> {
-        const _user: UserModel = await this.prismaService.user.findUnique({
-            where: { id: id },
-            include: {
-                cart: true,
+        try {
+            const _user: UserModel = await this.prismaService.user.findUnique({
+                where: { id: id },
+                include: {
+                    cart: true,
+                }
+            });
+            if (!_user) {
+                throw new HttpException('User not found', HttpStatus.NOT_FOUND);
             }
-        });
-        if (!_user) {
-            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+            return this.exclude(_user, ['password', 'salt']);
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return this.exclude(_user, ['password', 'salt']);
     }
 
     /**
@@ -131,16 +145,20 @@ export class UserService {
      * @returns [User] object without password and salt
      */
     async getUserById(id: string): Promise<UserModel> {
-        const _user: UserModel = await this.prismaService.user.findUnique({
-            where: { id: id },
-            include: {
-                cart: true,
+        try {
+            const _user: UserModel = await this.prismaService.user.findUnique({
+                where: { id: id },
+                include: {
+                    cart: true,
+                }
+            });
+            if (!_user) {
+                throw new HttpException('User not found', HttpStatus.NOT_FOUND);
             }
-        });
-        if (!_user) {
-            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+            return this.exclude(_user, ['password', 'salt']);
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return this.exclude(_user, ['password', 'salt']);
     }
 
     /**
@@ -148,12 +166,16 @@ export class UserService {
      * @returns [User[]] array of users without password and salt
      */
     async getUsers(): Promise<UserModel[]> {
-        const _users: Array<UserModel> = await this.prismaService.user.findMany({
-            include: {
-                cart: true,
-            }
-        });
-        return _users.map((user:UserModel) => this.exclude(user, ['password', 'salt']));
+        try {
+            const _users: Array<UserModel> = await this.prismaService.user.findMany({
+                include: {
+                    cart: true,
+                }
+            });
+            return _users.map((user: UserModel) => this.exclude(user, ['password', 'salt']));
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -163,21 +185,25 @@ export class UserService {
      * @returns [User] object without password and salt
      */
     async updateUser(id: string, user: UpdateUserDto): Promise<UserModel> {
-        const _user: UserModel = await this.prismaService.user.findUnique({
-            where: { id: id },
-        });
-        if (!_user) {
-            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+        try {
+            const _user: UserModel = await this.prismaService.user.findUnique({
+                where: { id: id },
+            });
+            if (!_user) {
+                throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+            }
+            // if user tries to update email
+            if (user.email && user.email !== _user.email) {
+                throw new HttpException('Email cannot be changed', HttpStatus.BAD_REQUEST);
+            }
+            const _updatedUser: UserModel = await this.prismaService.user.update({
+                where: { id: id },
+                data: user
+            });
+            return this.exclude(_updatedUser, ['password', 'salt']);
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        // if user tries to update email
-        if (user.email && user.email !== _user.email) {
-            throw new HttpException('Email cannot be changed', HttpStatus.BAD_REQUEST);
-        }
-        const _updatedUser:UserModel = await this.prismaService.user.update({
-            where: { id: id },
-            data: user
-        });
-        return this.exclude(_updatedUser, ['password', 'salt']);
     }
 
     /**
@@ -187,27 +213,31 @@ export class UserService {
      * @returns [User] object without password and salt
      */
     async addCart(id: string, cart: CreateCartDto): Promise<UserModel> {
-        const _user: UserModel = await this.prismaService.user.findUnique({
-            where: { id: id },
-            include: {
-                cart: true,
-            }
-        });
-        if (!_user) {
-            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-        }
-        const _userUpdate: UserModel = await this.prismaService.user.update({
-            where: { id: id },
-            data: {
-                cart: {
-                    create: cart
+        try {
+            const _user: UserModel = await this.prismaService.user.findUnique({
+                where: { id: id },
+                include: {
+                    cart: true,
                 }
+            });
+            if (!_user) {
+                throw new HttpException('User not found', HttpStatus.NOT_FOUND);
             }
-        });
-        if (!_user) {
-            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+            const _userUpdate: UserModel = await this.prismaService.user.update({
+                where: { id: id },
+                data: {
+                    cart: {
+                        create: cart
+                    }
+                }
+            });
+            if (!_user) {
+                throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+            }
+            return this.exclude(_userUpdate, ['password', 'salt']);
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return this.exclude(_userUpdate, ['password', 'salt']);
     }
 
     /**
@@ -222,27 +252,31 @@ export class UserService {
         cartId: string,
         cart: UpdateCartDto
     ): Promise<UserModel> {
-        const _user:UserModel = await this.prismaService.user.findUnique({
-            where: { id: userId },
-            include: {
-                cart: true,
+        try {
+            const _user: UserModel = await this.prismaService.user.findUnique({
+                where: { id: userId },
+                include: {
+                    cart: true,
+                }
+            });
+            if (!_user) {
+                throw new HttpException('User not found', HttpStatus.NOT_FOUND);
             }
-        });
-        if (!_user) {
-            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-        }
-        const _userUpdate:UserModel = await this.prismaService.user.update({
-            where: { id: userId },
-            data: {
-                cart: {
-                    update: {
-                        where: { id: cartId },
-                        data: cart
+            const _userUpdate: UserModel = await this.prismaService.user.update({
+                where: { id: userId },
+                data: {
+                    cart: {
+                        update: {
+                            where: { id: cartId },
+                            data: cart
+                        }
                     }
                 }
-            }
-        });
-        return this.exclude(_userUpdate, ['password', 'salt']);
+            });
+            return this.exclude(_userUpdate, ['password', 'salt']);
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -252,26 +286,30 @@ export class UserService {
      * @returns [User] object without password and salt
      */
     async deleteCart(userId: string, cartId: string): Promise<UserModel> {
-        const _user:UserModel = await this.prismaService.user.findUnique({
-            where: { id: userId },
-            include: {
-                cart: true,
+        try {
+            const _user: UserModel = await this.prismaService.user.findUnique({
+                where: { id: userId },
+                include: {
+                    cart: true,
+                }
+            });
+            if (!_user) {
+                throw new HttpException('User not found', HttpStatus.NOT_FOUND);
             }
-        });
-        if (!_user) {
-            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-        }
-        const _userUpdate:UserModel = await this.prismaService.user.update({
-            where: { id: userId },
-            data: {
-                cart: {
-                    delete: {
-                        id: cartId
+            const _userUpdate: UserModel = await this.prismaService.user.update({
+                where: { id: userId },
+                data: {
+                    cart: {
+                        delete: {
+                            id: cartId
+                        }
                     }
                 }
-            }
-        });
-        return this.exclude(_userUpdate, ['password', 'salt']);
+            });
+            return this.exclude(_userUpdate, ['password', 'salt']);
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 
@@ -281,13 +319,17 @@ export class UserService {
      * @returns [User] object without password and salt
      */
     async deleteUser(id: string): Promise<string> {
-        const _user:UserModel = await this.prismaService.user.delete({
-            where: { id: id },
-        });
-        if (!_user) {
-            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+        try {
+            const _user: UserModel = await this.prismaService.user.delete({
+                where: { id: id },
+            });
+            if (!_user) {
+                throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+            }
+            return _user.id;
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return _user.id;
     }
 
 

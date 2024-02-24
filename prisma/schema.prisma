@@ -100,8 +100,8 @@ model Product {
   name        String
   description String
   price       Json
-  quantity    Int
-  rating      Float
+  quantity    String
+  rating      String
   images      File[]
   status      ProductStatus     @default(ACTIVE)
   storeId     String
