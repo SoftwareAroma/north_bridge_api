@@ -6,6 +6,8 @@ import { Express } from 'express';
 import { UpdateProductDto } from './dto/update.dto';
 import { UpdateStoreCategoryDto } from '@store/dto/update.dto';
 import { PORT } from '@shared/environment';
+import { deleteFile } from './multer/multier.service';
+import path from 'path';
 
 @Injectable()
 export class ProductService {
@@ -174,12 +176,60 @@ export class ProductService {
      */
     async deleteProduct(id: string): Promise<string> {
         try {
+            // first find product
+            const _productExist = await this.prismaService.product.findUnique({
+                where: {
+                    id: id,
+                },
+                include: {
+                    images: true,
+                },
+            });
+            if (!_productExist) {
+                throw new HttpException('Product does not exist', HttpStatus.NOT_FOUND);
+            }
+            // delete all files associated with the product
+            _productExist.images.forEach(async (image) => {
+                const _path = path.join(`${process.cwd()}/`, `${image.path}`);
+                deleteFile(_path);
+            });
+            // delete the product
             const _product = await this.prismaService.product.delete({
                 where: {
                     id: id,
                 },
             });
             return _product.id;
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Delete a product image
+     * @param id id of product image to delete
+     * @returns string
+     */
+    async deleteProductImage(id: string): Promise<string> {
+        try {
+            // first find image
+            const _imageExist = await this.prismaService.file.findUnique({
+                where: {
+                    id: id,
+                },
+            });
+            if (!_imageExist) {
+                throw new HttpException('Image does not exist', HttpStatus.NOT_FOUND);
+            }
+            const _path = path.join(`${process.cwd()}/`, `${_imageExist.path}`);
+            deleteFile(_path);
+            // delete the image
+            const _image = await this.prismaService.file.delete({
+                where: {
+                    id: id,
+                },
+            });
+            return _image.id;
         } catch (error) {
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }

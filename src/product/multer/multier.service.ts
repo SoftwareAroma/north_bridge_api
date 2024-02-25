@@ -38,6 +38,18 @@ export const multerStorage: multer.StorageEngine = diskStorage({
     },
 });
 
+/**
+ * Delete file from the file system
+ * @param filePath 
+ */
+export const deleteFile = (filePath: string): void => {
+    fs.unlink(filePath, (err) => {
+        if (err) {
+            throw err;
+        }
+    });
+};
+
 @Injectable()
 export class MulterConfigService implements MulterOptionsFactory {
     createMulterOptions(): MulterModuleOptions {
