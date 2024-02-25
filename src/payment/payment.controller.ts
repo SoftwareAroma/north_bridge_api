@@ -5,7 +5,7 @@ import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@shared/guard';
 import { TransactionResponse, VerifyTransactionRespnse } from './dto/response.dto';
 
-@Controller('payment')
+@Controller({ path: 'payment', version: '1' })
 @ApiTags('Payment Endpoints')
 export class PaymentController {
     constructor(

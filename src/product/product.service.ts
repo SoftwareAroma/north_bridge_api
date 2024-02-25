@@ -5,7 +5,7 @@ import { ProductCategory as ProductCategoryModel, Product as ProductModel } from
 import { Express } from 'express';
 import { UpdateProductDto } from './dto/update.dto';
 import { UpdateStoreCategoryDto } from '@store/dto/update.dto';
-import { UPLOADS_DIR } from '@shared/environment';
+import { PORT } from '@shared/environment';
 
 @Injectable()
 export class ProductService {
@@ -77,7 +77,7 @@ export class ProductService {
             // get the full file path for each image from the uploads folder
             const _ = _products.map((product) => {
                 product.images = product.images.map((image) => {
-                    image.path = `${UPLOADS_DIR}/products/${image.path}`;
+                    image.path = `http://localhost:${PORT}/products/${image.name}`;
                     return image;
                 });
                 return product;
@@ -96,7 +96,7 @@ export class ProductService {
      */
     async getProduct(id: string): Promise<ProductModel> {
         try {
-            return await this.prismaService.product.findUnique({
+            const _product = await this.prismaService.product.findUnique({
                 where: {
                     id: id,
                 },
@@ -106,6 +106,12 @@ export class ProductService {
                     images: true,
                 },
             });
+            // get all image paths
+            _product.images = _product.images.map((image) => {
+                image.path = `http://localhost:${PORT}/products/${image.name}`;
+                return image;
+            });
+            return _product;
         } catch (error) {
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
