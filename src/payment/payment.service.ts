@@ -38,7 +38,7 @@ export class PaymentService {
             })
 
             const headers = {
-                Authorization: `Bearer ${PAY_STACK_API_KEY}`,
+                'Authorization': `Bearer ${PAY_STACK_API_KEY}`,
                 'Content-Type': 'application/json'
             }
 
