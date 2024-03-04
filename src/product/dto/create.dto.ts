@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { ProductStatus } from "@prisma/client";
-import { IsArray, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString } from "class-validator";
+import { IsArray, IsNotEmpty, IsObject, IsOptional, IsString } from "class-validator";
 
 export class CreateProductDto {
     @IsString()
@@ -32,7 +32,7 @@ export class CreateProductDto {
     @IsString()
     @IsOptional()
     @IsNotEmpty()
-    @ApiProperty({ required: false, default: 1.0 })
+    @ApiProperty({ required: false, default: '1.0' })
     rating: string;
 
     @IsArray()

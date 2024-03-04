@@ -26,7 +26,7 @@ import {
     ReadAdminPolicyHandler,
     UpdateAdminPolicyHandler
 } from '@shared/casl/handler/policy.handler';
-import {Response} from "express";
+import { Response } from "express";
 
 
 @ApiTags('Admin Endpoints')

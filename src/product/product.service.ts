@@ -5,7 +5,9 @@ import { ProductCategory as ProductCategoryModel, Product as ProductModel } from
 import { Express } from 'express';
 import { UpdateProductDto } from './dto/update.dto';
 import { UpdateStoreCategoryDto } from '@store/dto/update.dto';
-import { UPLOADS_DIR } from '@shared/environment';
+import { PORT } from '@shared/environment';
+import { deleteFile } from './multer/multier.service';
+import path from 'path';
 
 @Injectable()
 export class ProductService {
@@ -20,7 +22,9 @@ export class ProductService {
      */
     async createProduct(data: CreateProductDto, images?: Array<Express.Multer.File>): Promise<ProductModel> {
 
-        try {// if files is not empty, upload the file buffer to postgres
+        try {
+            // if files is not empty, upload the file buffer to postgres
+            let _imageList: Array<string> = [];
             if (images && images.length > 0) {
                 for (let i = 0; i < images.length; i++) {
                     const file = images[i];
@@ -32,7 +36,8 @@ export class ProductService {
                             path: file.path,
                         },
                     });
-                    data.images.push(_file.id);
+                    // add the id to the _imageList
+                    _imageList.push(_file.id);
                 }
             }
 
@@ -40,7 +45,7 @@ export class ProductService {
                 data: {
                     ...data,
                     images: {
-                        connect: data.images?.map((image) => ({ id: image })),
+                        connect: _imageList?.map((image) => ({ id: image })),
                     },
                     categories: {
                         connect: data.categories?.map((category) => ({ id: category })),
@@ -74,7 +79,7 @@ export class ProductService {
             // get the full file path for each image from the uploads folder
             const _ = _products.map((product) => {
                 product.images = product.images.map((image) => {
-                    image.path = `${UPLOADS_DIR}/products/${image.path}`;
+                    image.path = `http://localhost:${PORT}/products/${image.name}`;
                     return image;
                 });
                 return product;
@@ -93,7 +98,7 @@ export class ProductService {
      */
     async getProduct(id: string): Promise<ProductModel> {
         try {
-            return await this.prismaService.product.findUnique({
+            const _product = await this.prismaService.product.findUnique({
                 where: {
                     id: id,
                 },
@@ -103,6 +108,12 @@ export class ProductService {
                     images: true,
                 },
             });
+            // get all image paths
+            _product.images = _product.images.map((image) => {
+                image.path = `http://localhost:${PORT}/products/${image.name}`;
+                return image;
+            });
+            return _product;
         } catch (error) {
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -165,12 +176,60 @@ export class ProductService {
      */
     async deleteProduct(id: string): Promise<string> {
         try {
+            // first find product
+            const _productExist = await this.prismaService.product.findUnique({
+                where: {
+                    id: id,
+                },
+                include: {
+                    images: true,
+                },
+            });
+            if (!_productExist) {
+                throw new HttpException('Product does not exist', HttpStatus.NOT_FOUND);
+            }
+            // delete all files associated with the product
+            _productExist.images.forEach(async (image) => {
+                const _path = path.join(`${process.cwd()}/`, `${image.path}`);
+                deleteFile(_path);
+            });
+            // delete the product
             const _product = await this.prismaService.product.delete({
                 where: {
                     id: id,
                 },
             });
             return _product.id;
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Delete a product image
+     * @param id id of product image to delete
+     * @returns string
+     */
+    async deleteProductImage(id: string): Promise<string> {
+        try {
+            // first find image
+            const _imageExist = await this.prismaService.file.findUnique({
+                where: {
+                    id: id,
+                },
+            });
+            if (!_imageExist) {
+                throw new HttpException('Image does not exist', HttpStatus.NOT_FOUND);
+            }
+            const _path = path.join(`${process.cwd()}/`, `${_imageExist.path}`);
+            deleteFile(_path);
+            // delete the image
+            const _image = await this.prismaService.file.delete({
+                where: {
+                    id: id,
+                },
+            });
+            return _image.id;
         } catch (error) {
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }

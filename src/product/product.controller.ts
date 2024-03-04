@@ -65,15 +65,13 @@ export class ProductController {
     async createProduct(
         @Body() data: CreateProductDto,
         @UploadedFiles() files: Array<Express.Multer.File>,
-    ): Promise<CustomApiResponse<{ product: ProductModel }> | any> {
-        console.log(data);
-        console.log(files);
-        // const product: ProductModel = await this.productService.createProduct(data, files);
-        // return new CustomApiResponse<{ product: ProductModel }>({
-        //     data: { product: product },
-        //     message: 'Product created successfully',
-        //     success: true,
-        // });
+    ): Promise<CustomApiResponse<{ product: ProductModel }>> {
+        const product: ProductModel = await this.productService.createProduct(data, files);
+        return new CustomApiResponse<{ product: ProductModel }>({
+            data: { product: product },
+            message: 'Product created successfully',
+            success: true,
+        });
     }
 
     @Get('products')
@@ -124,6 +122,25 @@ export class ProductController {
         return new CustomApiResponse<{ product: ProductModel }>({
             data: { product: product },
             message: 'Product updated successfully',
+            success: true,
+        });
+    }
+
+    @CheckPolicies(new UpdateProductCategoryPolicyHandler())
+    @UseGuards(JwtAuthGuard, PoliciesGuard)
+    @Patch('product-image/:id')
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Product updated successfully',
+        type: ProductResponse,
+    })
+    async deleteProductImage(
+        @Param('id') id: string,
+    ): Promise<CustomApiResponse<{ product: String }>> {
+        const product: String = await this.productService.deleteProductImage(id);
+        return new CustomApiResponse<{ product: String }>({
+            data: { product: product },
+            message: 'Product image deleted successfully',
             success: true,
         });
     }

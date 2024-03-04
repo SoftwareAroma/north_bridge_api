@@ -67,8 +67,8 @@ export class VendorService {
      * @param response
      */
     async loginVendor(data: LoginVendorDto, response: Response): Promise<string> {
-        // console.log(data);
         try {
+            // console.log(data.email);
             const _vendor: VendorModel = await this.prismaService.vendor.findUnique({
                 where: {
                     email: data.email,
@@ -76,7 +76,7 @@ export class VendorService {
             });
             // if vendor does not exist
             if (!_vendor) {
-                throw new HttpException(`No account found for vendor with email ${_vendor.email}`, HttpStatus.NOT_FOUND);
+                throw new HttpException(`No account found for vendor with email ${data.email}`, HttpStatus.NOT_FOUND);
             }
 
             const isPasswordValid: boolean = await comparePassword(data.password, _vendor.password);

@@ -20,3 +20,10 @@ export class CreatePaymentDto {
     @ApiProperty({ type: String, description: 'Email to receive the payment', required: true })
     email: string;
 }
+
+export class VerifyPaymentDto {
+    @IsNotEmpty()
+    @IsString()
+    @ApiProperty({ type: String, description: 'Reference for the transaction', required: true })
+    reference: string;
+}

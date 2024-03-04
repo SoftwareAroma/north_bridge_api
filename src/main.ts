@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser';
 import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@shared/prisma/prisma.service';
+import { join } from 'path';
 
 /*
  * ######################################################
@@ -17,6 +18,8 @@ async function bootstrap(): Promise<void> {
   const app: NestExpressApplication = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: ['error', 'warn', 'debug', 'verbose'], // log only in these cases
   });
+
+  app.useStaticAssets(join(__dirname, '..', 'uploads'));
 
   // app config service
   const configService: ConfigService<any, any> = app.get(ConfigService);
