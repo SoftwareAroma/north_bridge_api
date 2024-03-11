@@ -5,7 +5,7 @@ import multer, { diskStorage } from "multer";
 import path, { extname } from "path";
 import process from "process";
 import fs from "fs";
-import Express from 'express';
+import { Express } from 'express';
 
 export const multerLimits: { fileSize: number } = {
     fileSize: 1024 * 1024 * 10, // 10MB
