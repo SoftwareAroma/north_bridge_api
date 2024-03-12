@@ -37,7 +37,7 @@ import { StringResponse } from '@app/response/response.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { multerLimits, multerStorage } from './multer/multier.service';
 import { UpdateProductDto } from './dto/update.dto';
-import Express from 'express';
+import { Express } from 'express';
 
 @ApiTags('Products Endpoints')
 @Controller({ path: 'product', version: '1' })
@@ -136,9 +136,9 @@ export class ProductController {
     })
     async deleteProductImage(
         @Param('id') id: string,
-    ): Promise<CustomApiResponse<{ product: String }>> {
-        const product: String = await this.productService.deleteProductImage(id);
-        return new CustomApiResponse<{ product: String }>({
+    ): Promise<CustomApiResponse<{ product: string }>> {
+        const product: string = await this.productService.deleteProductImage(id);
+        return new CustomApiResponse<{ product: string }>({
             data: { product: product },
             message: 'Product image deleted successfully',
             success: true,

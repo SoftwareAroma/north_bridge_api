@@ -1,12 +1,12 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '@shared/prisma/prisma.service';
-import { CreateCartDto, CreateUserDto } from './dto/create.dto';
+import { CreateCartDto, CreateOrderDto, CreateUserDto } from './dto/create.dto';
 import { Response } from 'express';
 import { LoginUserDto } from './dto/login.dto';
 import { comparePassword, generateSalt, getDefaultPropertyValue, hashPassword, PayLoad } from '@shared';
-import { User as UserModel } from '@prisma/client';
-import { UpdateCartDto, UpdateUserDto } from './dto/update.dto';
+import { Order as OrderModel, User as UserModel } from '@prisma/client';
+import { UpdateCartDto, UpdateOrderDto, UpdateUserDto } from './dto/update.dto';
 
 @Injectable()
 export class UserService {
@@ -332,6 +332,115 @@ export class UserService {
         }
     }
 
+    /**
+     *  Create an order
+     * @param data CreateOrderDto
+     * @returns Object -> OrderModel
+     */
+    async createOrder(data: CreateOrderDto): Promise<OrderModel> {
+        try {
+            const _order = await this.prismaService.order.create({
+                data: {
+                    ...data,
+                    orderItems: {
+                        connect: data.orderItems.map((item) => {
+                            return { id: item };
+                        })
+                    }
+                }
+            });
+            return _order;
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Get all orders
+     */
+    async getOrders(): Promise<OrderModel[]> {
+        try {
+            const _orders = await this.prismaService.order.findMany();
+            return _orders;
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Get an order by id
+     */
+    async getOrderById(id: string): Promise<OrderModel> {
+        try {
+            const _order = await this.prismaService.order.findUnique({
+                where: { id: id },
+            });
+            if (!_order) {
+                throw new HttpException('Order not found', HttpStatus.NOT_FOUND);
+            }
+            return _order;
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Get all orders by user id
+     */
+    async getOrdersByUserId(userId: string): Promise<OrderModel[]> {
+        try {
+            const _orders = await this.prismaService.order.findMany({
+                where: { userId: userId },
+            });
+            return _orders;
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     *  Update an order
+     * @param id  order id
+     * @param data  UpdateOrderDto
+     * @returns  Object -> OrderModel
+     */
+    async updateOrder(id: string, data: UpdateOrderDto): Promise<OrderModel> {
+        try {
+            const _order = await this.prismaService.order.update({
+                where: { id: id },
+                data: {
+                    ...data,
+                    orderItems: {
+                        connect: data.orderItems.map((item) => {
+                            return { id: item };
+                        })
+                    }
+                }
+            });
+            return _order;
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Delete an order by id
+     * @param id -> order id
+     * @returns string -> order id
+     */
+    async deleteOrder(id: string): Promise<string> {
+        try {
+            const _order = await this.prismaService.order.delete({
+                where: { id: id },
+            });
+            if (!_order) {
+                throw new HttpException('Order not found', HttpStatus.NOT_FOUND);
+            }
+            return _order.id;
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
     /**
      * Exclude properties from a user object
