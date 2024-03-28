@@ -1,4 +1,4 @@
-import { Controller, Get, HttpStatus } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Redirect } from '@nestjs/common';
 import { AppService } from './app.service';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AppResponse } from './response/response.dto';
