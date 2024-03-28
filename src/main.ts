@@ -31,7 +31,7 @@ async function bootstrap(): Promise<void> {
   const apiVersion: string = configService.get<string>('API_VERSION');
   const appName: string = 'NORTH BRIDGE';
   const swaggerPath: string = 'swagger';
-  app.setGlobalPrefix('api');
+  // app.setGlobalPrefix('api');
 
   // enable CORS
   app.enableCors({
@@ -89,7 +89,7 @@ async function bootstrap(): Promise<void> {
   await app
     .listen(port)
     .then((): void => {
-      console.log(`Server running on port http://localhost:${port}/api`);
+      console.log(`Server running on port http://localhost:${port}`);
       console.log(
         `Swagger running on port http://localhost:${port}/${swaggerPath}`,
       );
