@@ -38,13 +38,6 @@ import { PaymentModule } from '@payment/payment.module';
             signOptions: { expiresIn: jwtConstants.expiresIn },
         }),
 
-
-        /// prevent brute force attack
-        // ThrottlerModule.forRoot({
-        //   ttl: 60,
-        //   limit: 10,
-        // }),
-
         /// configurations
         ConfigModule.forRoot({
             load: [configuration],
