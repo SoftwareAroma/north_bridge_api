@@ -5,6 +5,9 @@
 .idea/
 uploads/
 
+.env
+.env.production
+
 # Logs
 logs
 *.log
