@@ -3,6 +3,7 @@
 /node_modules
 
 .idea/
+/uploads/
 uploads/
 
 # add .env file to .gitignore
