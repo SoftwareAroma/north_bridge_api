@@ -9,6 +9,7 @@ export class AppController {
   constructor(private readonly appService: AppService) { }
 
   @Get()
+  @Redirect('https://api.northbridge.store/swagger')
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Welcome to the North Bridge API',
