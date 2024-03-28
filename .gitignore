@@ -5,8 +5,9 @@
 .idea/
 uploads/
 
+# add .env file to .gitignore
 .env
-.env.production
+
 
 # Logs
 logs
