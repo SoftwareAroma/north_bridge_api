@@ -10,8 +10,8 @@ import {
     JwtStrategy,
     configuration,
     jwtConstants,
-    HttpExceptionFilter,
-    PrismaClientExceptionFilter
+    // HttpExceptionFilter,
+    // PrismaClientExceptionFilter
 } from '@shared';
 import Joi from 'joi';
 import { VendorModule } from '@vendor/vendor.module';
@@ -61,14 +61,14 @@ import { PaymentModule } from '@payment/payment.module';
     providers: [
         AppService,
         JwtStrategy,
-        {
-            provide: 'APP_FILTER',
-            useClass: HttpExceptionFilter,
-        },
-        {
-            provide: 'PRISMA_FILTER',
-            useClass: PrismaClientExceptionFilter,
-        }
+        // {
+        //     provide: 'APP_FILTER',
+        //     useClass: HttpExceptionFilter,
+        // },
+        // {
+        //     provide: 'PRISMA_FILTER',
+        //     useClass: PrismaClientExceptionFilter,
+        // }
     ],
 
 })
