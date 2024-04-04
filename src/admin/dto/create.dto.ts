@@ -5,7 +5,6 @@ import {
     IsEmail,
     IsNotEmpty,
     IsOptional,
-    IsPhoneNumber,
     IsString,
     IsStrongPassword
 } from "class-validator";
