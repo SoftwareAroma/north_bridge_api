@@ -5,7 +5,7 @@ import { ProductCategory as ProductCategoryModel, Product as ProductModel } from
 import { Express } from 'express';
 import { UpdateProductDto } from './dto/update.dto';
 import { UpdateStoreCategoryDto } from '@store/dto/update.dto';
-import { PORT } from '@shared/environment';
+// import { PORT } from '@shared/environment';
 import { deleteFile } from './multer/multier.service';
 import path from 'path';
 
@@ -24,7 +24,7 @@ export class ProductService {
 
         try {
             // if files is not empty, upload the file buffer to postgres
-            let _imageList: Array<string> = [];
+            const _imageList: Array<string> = [];
             if (images && images.length > 0) {
                 for (let i = 0; i < images.length; i++) {
                     const file = images[i];
@@ -77,9 +77,9 @@ export class ProductService {
             });
 
             // get the full file path for each image from the uploads folder
-            const _ = _products.map((product) => {
+            _products.map((product) => {
                 product.images = product.images.map((image) => {
-                    image.path = `http://localhost:${PORT}/products/${image.name}`;
+                    image.path = `https://api.northbridge.store/products/${image.name}`;
                     return image;
                 });
                 return product;
@@ -110,7 +110,7 @@ export class ProductService {
             });
             // get all image paths
             _product.images = _product.images.map((image) => {
-                image.path = `http://localhost:${PORT}/products/${image.name}`;
+                image.path = `https://api.northbridge.store/products/${image.name}`;
                 return image;
             });
             return _product;
