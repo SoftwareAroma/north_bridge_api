@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '@shared/prisma/prisma.service';
-import { CreateCartDto, CreateOrderDto, CreateUserDto } from './dto/create.dto';
+import { CreateCartDto, CreateOrderDto, CreateOrderItemDto, CreateUserDto } from './dto/create.dto';
 import { Response } from 'express';
 import { LoginUserDto } from './dto/login.dto';
 import { comparePassword, generateSalt, getDefaultPropertyValue, hashPassword, PayLoad } from '@shared';
@@ -332,6 +332,26 @@ export class UserService {
         }
     }
 
+    async createOrderItem(orderItem: CreateOrderItemDto): Promise<string> {
+        try {
+            const _orderItem = await this.prismaService.orderItem.create({ data: orderItem });
+            return _orderItem.id;
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    async deleteOrderItem(id: string): Promise<string> {
+        try {
+            const _orderItem = await this.prismaService.orderItem.delete({
+                where: { id: id }
+            });
+            return _orderItem.id;
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     /**
      *  Create an order
      * @param data CreateOrderDto
@@ -343,9 +363,12 @@ export class UserService {
                 data: {
                     ...data,
                     orderItems: {
-                        connect: data.orderItems.map((item) => {
-                            return { id: item };
-                        })
+                        createMany: {
+                            data: data.orderItems
+                        }
+                        // connect: data.orderItems.map((item) => {
+                        //     return { id: item };
+                        // })
                     }
                 }
             });
@@ -360,7 +383,16 @@ export class UserService {
      */
     async getOrders(): Promise<OrderModel[]> {
         try {
-            const _orders = await this.prismaService.order.findMany();
+            const _orders = await this.prismaService.order.findMany({
+                include: {
+                    orderItems: {
+                        include: {
+                            product: true,
+                        }
+                    },
+                    user: true,
+                }
+            });
             return _orders;
         } catch (error) {
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -411,9 +443,15 @@ export class UserService {
                 data: {
                     ...data,
                     orderItems: {
-                        connect: data.orderItems.map((item) => {
-                            return { id: item };
-                        })
+                        // connect: data.orderItems.map((item) => {
+                        //     return { id: item };
+                        // })
+                        // updateMany: data.orderItems.map((item) => {
+                        //     return {
+                        //         where: { id: item.id }, // Assuming there's an ID field in UpdateOrderItemDto
+                        //         data: { ...item } // Assuming item contains the fields to be updated
+                        //     };
+                        // })
                     }
                 }
             });

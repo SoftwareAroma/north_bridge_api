@@ -8,6 +8,7 @@ import { UpdateStoreCategoryDto } from '@store/dto/update.dto';
 // import { PORT } from '@shared/environment';
 import { deleteFile } from './multer/multier.service';
 import path from 'path';
+import { BACKEND_URL } from '@shared/index';
 
 @Injectable()
 export class ProductService {
@@ -79,7 +80,7 @@ export class ProductService {
             // get the full file path for each image from the uploads folder
             _products.map((product) => {
                 product.images = product.images.map((image) => {
-                    image.path = `https://api.northbridge.store/products/${image.name}`;
+                    image.path = `${BACKEND_URL}/products/${image.name}`;
                     return image;
                 });
                 return product;
@@ -110,7 +111,7 @@ export class ProductService {
             });
             // get all image paths
             _product.images = _product.images.map((image) => {
-                image.path = `https://api.northbridge.store/products/${image.name}`;
+                image.path = `${BACKEND_URL}/products/${image.name}`;
                 return image;
             });
             return _product;
