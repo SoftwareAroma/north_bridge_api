@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Role } from "@prisma/client";
-import { IsBoolean, IsEmail, IsNotEmpty, IsNumber, IsOptional, IsString, IsStrongPassword } from "class-validator";
+import { IsBoolean, IsEmail, IsInt, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString, IsStrongPassword } from "class-validator";
 
 export class CreateUserDto {
     @IsEmail()
@@ -99,7 +99,7 @@ export class CreateOrderDto {
     @ApiProperty({ required: true })
     address: string;
 
-    @IsNumber()
+    @IsString()
     @IsNotEmpty()
     @ApiProperty({ required: true })
     paymentMethod: string;
@@ -119,8 +119,37 @@ export class CreateOrderDto {
     @ApiProperty({ required: true })
     totalPrice: number;
 
-    @IsString({ each: true })
+    @IsObject({
+        each: true,
+    })
     @IsNotEmpty()
     @ApiProperty({ required: true })
-    orderItems: string[];
+    orderItems: CreateOrderItemDto[];
+}
+
+export class CreateOrderItemDto {
+    @IsInt()
+    @IsNotEmpty()
+    @ApiProperty({ required: true })
+    quantity: number
+
+    @IsString()
+    @IsNotEmpty()
+    @ApiProperty({ required: true })
+    price: string
+
+    @IsString()
+    @IsNotEmpty()
+    @ApiProperty({ required: false })
+    currency: string
+
+    @IsString()
+    @IsOptional()
+    @ApiProperty({ required: false })
+    orderId?: string
+
+    @IsString()
+    @IsNotEmpty()
+    @ApiProperty({ required: true })
+    productId: string
 }
