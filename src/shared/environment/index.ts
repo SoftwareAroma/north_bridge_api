@@ -8,6 +8,8 @@ const ORIGIN_URL: string = process.env.ORIGIN_URL
 const UPLOADS_DIR: string = process.env.UPLOADS_DIR || 'uploads'
 const API_VERSION: string = process.env.API_VERSION
 const APP_NAME: string = process.env.APP_NAME
+const FRONTEND_URL: string = process.env.FRONTEND_URL
+const BACKEND_URL: string = process.env.BACKEND_URL
 const SWAGGER_PATH: string = process.env.SWAGGER_PATH
 const PAY_STACK_API_KEY: string = process.env.PAY_STACK_API_KEY
 const PAY_STACK_CURRENCY: string = process.env.PAY_STACK_CURRENCY
@@ -30,6 +32,8 @@ export const configuration = () => ({
     APP_NAME,
     PAY_STACK_API_KEY,
     PAY_STACK_CURRENCY,
+    FRONTEND_URL,
+    BACKEND_URL,
 });
 
 export {
@@ -46,4 +50,6 @@ export {
     APP_NAME,
     PAY_STACK_API_KEY,
     PAY_STACK_CURRENCY,
+    FRONTEND_URL,
+    BACKEND_URL
 }
